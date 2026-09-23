@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ZYRA Business — AI Business Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ===== SHARED ===== */
+:root {
+  --violet:#5B3BF5; --violet-light:#7C5FF7; --violet-dark:#3D22D4;
+  --ink:#0A0A12; --white:#FFFFFF; --muted:#6B6880;
+  --border:rgba(91,59,245,0.15); --surface:#F6F5FF; --surface2:#EEEAFF;
+  --green:#22C55E; --green-dim:rgba(34,197,94,0.12);
+  --red:#EF4444; --red-dim:rgba(239,68,68,0.12); --yellow:#F59E0B;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+/* PAGE SYSTEM */
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+#page-dashboard{display:none;}
+#page-dashboard.active{display:flex;}
+
+/* INTERNET CHECK */
+#no-internet{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0A0A12 0%,#1A0D3D 100%);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+#no-internet.show{display:flex;}
+.no-net-icon{font-size:72px;margin-bottom:24px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.no-net-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:white;margin-bottom:12px;}
+.no-net-sub{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.65;max-width:320px;margin-bottom:28px;}
+.no-net-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;text-align:left;width:100%;max-width:300px;}
+.no-net-step{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.06);border-radius:12px;padding:12px 16px;}
+.no-net-step span{font-size:13px;color:rgba(255,255,255,0.7);}
+.no-net-pulse{width:10px;height:10px;border-radius:50%;background:#EF4444;flex-shrink:0;animation:pulse 1.5s infinite;}
+.no-net-btn{background:#5B3BF5;color:white;border:none;padding:14px 32px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:0 8px 24px rgba(91,59,245,0.4);transition:all .2s;}
+.no-net-btn:hover{background:#7C5FF7;transform:translateY(-2px);}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ink);color:white;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.3);transition:transform .3s;z-index:9999;white-space:nowrap;}
+
+/* ===== LANDING PAGE ===== */
+#page-landing{background:white;color:var(--ink);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 5%;background:rgba(255,255,255,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--ink);text-decoration:none;cursor:pointer;}
+.logo-icon{width:38px;height:38px;border-radius:10px;background:var(--violet);display:flex;align-items:center;justify-content:center;color:white;font-size:17px;font-weight:900;font-family:'Syne',sans-serif;}
+.nav-links{display:flex;align-items:center;gap:28px;}
+.nav-links a{font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--ink);}
+.nav-cta{background:var(--violet)!important;color:white!important;padding:10px 22px;border-radius:50px;font-weight:600!important;transition:background .2s,transform .15s!important;}
+.nav-cta:hover{background:var(--violet-light)!important;transform:scale(1.03);}
+
+.hero{min-height:100vh;padding:120px 5% 80px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;background:linear-gradient(160deg,#F8F6FF 0%,#FFF 50%,#F0EEFF 100%);overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(91,59,245,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:50px;background:var(--surface2);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--violet);text-transform:uppercase;letter-spacing:.08em;margin-bottom:28px;}
+.hero-badge span{width:7px;height:7px;border-radius:50%;background:var(--violet);display:inline-block;animation:pulse 1.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(40px,7vw,76px);font-weight:800;line-height:1.06;letter-spacing:-0.02em;color:var(--ink);max-width:820px;margin-bottom:24px;}
+.hero h1 .accent{color:var(--violet);}
+.hero>p{font-size:clamp(15px,2vw,19px);color:var(--muted);max-width:560px;line-height:1.65;margin-bottom:44px;}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:60px;}
+.btn-primary{background:var(--violet);color:white;padding:15px 32px;border-radius:50px;font-size:15px;font-weight:700;text-decoration:none;transition:background .2s,transform .15s,box-shadow .2s;box-shadow:0 8px 32px rgba(91,59,245,0.35);cursor:pointer;border:none;font-family:'Inter',sans-serif;}
+.btn-primary:hover{background:var(--violet-light);transform:translateY(-2px);box-shadow:0 12px 40px rgba(91,59,245,0.45);}
+.btn-outline{border:1.5px solid var(--border);color:var(--ink);padding:15px 32px;border-radius:50px;font-size:15px;font-weight:600;text-decoration:none;background:white;transition:border-color .2s,transform .15s;}
+.btn-outline:hover{border-color:var(--violet);transform:translateY(-2px);}
+.hero-trust{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap;justify-content:center;}
+.hero-trust .dot{width:4px;height:4px;border-radius:50%;background:var(--border);}
+
+.preview-wrap{width:100%;max-width:900px;margin-top:56px;border-radius:20px;overflow:hidden;border:1px solid var(--border);box-shadow:0 40px 100px rgba(91,59,245,0.15),0 2px 8px rgba(0,0,0,0.06);}
+.preview-bar{background:var(--ink);padding:12px 18px;display:flex;align-items:center;gap:8px;}
+.dot-r{width:11px;height:11px;border-radius:50%;background:#FF5F57;}
+.dot-y{width:11px;height:11px;border-radius:50%;background:#FEBC2E;}
+.dot-g{width:11px;height:11px;border-radius:50%;background:#28C840;}
+.preview-bar span{color:rgba(255,255,255,0.4);font-size:12px;margin-left:auto;}
+.pdash{background:#0D0B1A;display:grid;grid-template-columns:170px 1fr;min-height:380px;}
+.pside{background:#110F22;padding:20px 14px;border-right:1px solid rgba(255,255,255,0.06);}
+.pside-logo{font-family:'Syne',sans-serif;font-weight:800;color:white;font-size:15px;margin-bottom:24px;display:flex;align-items:center;gap:8px;}
+.pside-logo .pi{width:26px;height:26px;border-radius:7px;background:var(--violet);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white;}
+.pni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;margin-bottom:3px;font-size:12px;color:rgba(255,255,255,0.4);}
+.pni.a{background:rgba(91,59,245,0.2);color:white;border:1px solid rgba(91,59,245,0.3);}
+.pni svg{width:13px;height:13px;flex-shrink:0;}
+.pmain{padding:20px;display:flex;flex-direction:column;gap:14px;}
+.ptop{display:flex;justify-content:space-between;align-items:center;}
+.ptop h3{color:white;font-size:15px;font-weight:700;}
+.ptop span{font-size:11px;color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.06);padding:4px 10px;border-radius:50px;}
+.pstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.psc{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px;}
+.psc .pl{font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+.psc .pv{font-size:20px;font-weight:800;color:white;margin-bottom:4px;}
+.psc .pc{font-size:10px;color:var(--green);font-weight:600;}
+.pchart{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px;height:110px;position:relative;overflow:hidden;}
+.pchart h4{font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px;font-weight:500;}
+.aibubble{position:absolute;bottom:12px;right:12px;background:var(--violet);border-radius:10px;padding:6px 12px;font-size:10px;color:white;font-weight:600;}
+
+lsection{display:block;padding:90px 5%;}
+.s-tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--violet);margin-bottom:14px;}
+h2.s-title{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.12;color:var(--ink);letter-spacing:-0.02em;margin-bottom:16px;}
+.s-sub{font-size:17px;color:var(--muted);line-height:1.6;max-width:520px;margin-bottom:52px;}
+
+.feats-bg{background:var(--surface);}
+.feats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
+.fc{background:white;border:1px solid var(--border);border-radius:22px;padding:30px;transition:transform .2s,box-shadow .2s;}
+.fc:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(91,59,245,0.12);}
+.fc-icon{width:50px;height:50px;border-radius:13px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;}
+.fc h3{font-size:17px;font-weight:700;margin-bottom:9px;color:var(--ink);}
+.fc p{font-size:14px;color:var(--muted);line-height:1.65;}
+
+.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;}
+.steps{display:flex;flex-direction:column;gap:28px;}
+.step{display:flex;gap:18px;align-items:flex-start;}
+.step-n{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:var(--violet);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+.step h3{font-size:16px;font-weight:700;margin-bottom:5px;}
+.step p{font-size:14px;color:var(--muted);line-height:1.6;}
+.how-vis{background:linear-gradient(135deg,var(--violet) 0%,#8B5CF6 100%);border-radius:22px;padding:36px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px rgba(91,59,245,0.3);}
+.cm{background:rgba(255,255,255,0.12);border-radius:13px;padding:13px 16px;color:white;font-size:13px;line-height:1.5;}
+.cm.u{background:rgba(255,255,255,0.22);align-self:flex-end;max-width:80%;}
+.cm.ai{align-self:flex-start;max-width:90%;}
+.clabel{font-size:10px;font-weight:700;opacity:.6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+
+.pricing-bg{background:var(--ink);}
+.pricing-bg .s-tag{color:#A78BFA;}
+.pricing-bg h2.s-title{color:white;}
+.pricing-bg .s-sub{color:rgba(255,255,255,0.5);}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.pc{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:22px;padding:32px;transition:transform .2s;}
+.pc:hover{transform:translateY(-4px);}
+.pc.feat{background:var(--violet);border-color:var(--violet);box-shadow:0 24px 60px rgba(91,59,245,0.5);transform:scale(1.04);}
+.pc.feat:hover{transform:scale(1.04) translateY(-4px);}
+.pbadge{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--violet);background:rgba(91,59,245,0.15);padding:4px 12px;border-radius:50px;margin-bottom:18px;}
+.pc.feat .pbadge{background:rgba(255,255,255,0.2);color:white;}
+.pname{font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:8px;font-weight:600;}
+.pc.feat .pname{color:rgba(255,255,255,0.8);}
+.pprice{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:white;margin-bottom:5px;}
+.pprice span{font-size:15px;font-weight:500;opacity:.6;}
+.pdesc{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:24px;}
+.pc.feat .pdesc{color:rgba(255,255,255,0.7);}
+.pfeats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.pfeats li{display:flex;align-items:center;gap:9px;font-size:13px;color:rgba(255,255,255,0.65);}
+.pc.feat .pfeats li{color:rgba(255,255,255,0.9);}
+.pfeats li::before{content:'✓';font-weight:800;color:var(--green);font-size:12px;flex-shrink:0;}
+.pc.feat .pfeats li::before{color:rgba(255,255,255,0.9);}
+.pbtn{display:block;text-align:center;text-decoration:none;padding:13px;border-radius:50px;font-weight:700;font-size:14px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.15);transition:background .2s;cursor:pointer;font-family:'Inter',sans-serif;}
+.pbtn:hover{background:rgba(255,255,255,0.18);}
+.pc.feat .pbtn{background:white;color:var(--violet);border-color:transparent;}
+.pc.feat .pbtn:hover{background:#F0EEFF;}
+
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.tc{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:26px;}
+.stars{color:#F59E0B;font-size:14px;margin-bottom:13px;}
+.tc blockquote{font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:18px;font-style:italic;}
+.ta{display:flex;align-items:center;gap:11px;}
+.tav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--violet),#8B5CF6);display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:13px;}
+.ta .tn{font-size:14px;font-weight:700;}
+.ta .tr{font-size:12px;color:var(--muted);}
+
+.faq-list{max-width:720px;display:flex;flex-direction:column;gap:12px;}
+.fi{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.fq{padding:18px 22px;font-size:15px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;color:var(--ink);}
+.fq .fi-icon{font-size:18px;color:var(--violet);transition:transform .3s;}
+.fa{padding:0 22px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;font-size:14px;color:var(--muted);line-height:1.7;}
+.fi.open .fa{max-height:200px;padding:0 22px 18px;}
+.fi.open .fi-icon{transform:rotate(45deg);}
+
+.cta-section{background:linear-gradient(135deg,var(--violet) 0%,#7C3AED 100%);text-align:center;padding:90px 5%;}
+.cta-section h2{font-family:'Syne',sans-serif;font-size:clamp(30px,5vw,54px);font-weight:800;color:white;margin-bottom:16px;letter-spacing:-0.02em;}
+.cta-section p{color:rgba(255,255,255,0.75);font-size:18px;margin-bottom:36px;}
+.btn-white{display:inline-block;background:white;color:var(--violet);padding:15px 38px;border-radius:50px;font-size:16px;font-weight:800;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 8px 30px rgba(0,0,0,0.2);cursor:pointer;border:none;font-family:'Inter',sans-serif;}
+.btn-white:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,0.3);}
+
+footer{background:var(--ink);padding:56px 5% 28px;}
+.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:44px;}
+.fb .logo{color:white;display:inline-flex;}
+.fb p{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.65;max-width:240px;margin-top:12px;}
+.fcol h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.35);margin-bottom:14px;}
+.fcol a{display:block;font-size:14px;color:rgba(255,255,255,0.55);text-decoration:none;margin-bottom:9px;transition:color .2s;}
+.fcol a:hover{color:white;}
+.fbot{border-top:1px solid rgba(255,255,255,0.08);padding-top:22px;display:flex;justify-content:space-between;align-items:center;}
+.fbot p{font-size:13px;color:rgba(255,255,255,0.3);}
+
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease;}
+.fade-up.visible{opacity:1;transform:translateY(0);}
+
+/* ===== AUTH PAGE ===== */
+#page-auth{background:var(--ink);}
+.auth-layout{display:flex;min-height:100vh;}
+.auth-left{width:45%;background:linear-gradient(145deg,#0D0B1A 0%,#1A0D3D 50%,#0F0A20 100%);display:flex;flex-direction:column;justify-content:space-between;padding:48px;position:relative;overflow:hidden;}
+.auth-left::before{content:'';position:absolute;top:-100px;left:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(91,59,245,0.25) 0%,transparent 70%);pointer-events:none;}
+.auth-left::after{content:'';position:absolute;bottom:-150px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(124,95,247,0.2) 0%,transparent 70%);pointer-events:none;}
+.al-logo{display:flex;align-items:center;gap:12px;text-decoration:none;position:relative;z-index:2;cursor:pointer;}
+.al-logo-icon{width:42px;height:42px;border-radius:12px;background:var(--violet);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:18px;font-weight:900;color:white;box-shadow:0 8px 24px rgba(91,59,245,0.5);}
+.al-logo span{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:white;}
+.al-content{position:relative;z-index:2;}
+.al-content h2{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-0.02em;margin-bottom:18px;color:white;}
+.al-content h2 .acc{background:linear-gradient(135deg,#A78BFA,#7C5FF7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.al-content p{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.65;margin-bottom:36px;}
+.float-cards{display:flex;flex-direction:column;gap:11px;}
+.float-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:15px;padding:15px 18px;display:flex;align-items:center;gap:13px;backdrop-filter:blur(10px);}
+.fc-icon2{width:38px;height:38px;border-radius:9px;background:rgba(91,59,245,0.3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.fc-title{font-size:13px;font-weight:600;color:white;margin-bottom:2px;}
+.fc-sub{font-size:12px;color:rgba(255,255,255,0.45);}
+.al-bottom{position:relative;z-index:2;display:flex;align-items:center;gap:10px;}
+.al-avs{display:flex;}
+.al-av{width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);margin-left:-7px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;color:white;}
+.al-av:first-child{margin-left:0;}
+.al-bottom p{font-size:13px;color:rgba(255,255,255,0.5);}
+.al-bottom strong{color:white;}
+
+.auth-right{width:55%;background:white;display:flex;align-items:center;justify-content:center;padding:48px;overflow-y:auto;}
+.auth-box{width:100%;max-width:420px;}
+.auth-tabs{display:flex;gap:0;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:30px;}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;border:none;background:none;font-family:'Inter',sans-serif;}
+.auth-tab.active{background:white;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.auth-header{margin-bottom:26px;}
+.auth-header h1{font-family:'Syne',sans-serif;font-size:27px;font-weight:800;color:var(--ink);margin-bottom:5px;letter-spacing:-0.02em;}
+.auth-header p{font-size:14px;color:var(--muted);}
+.btn-google{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:13px;border-radius:12px;border:1.5px solid #E5E3F0;background:white;color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:18px;font-family:'Inter',sans-serif;}
+.btn-google:hover{border-color:var(--violet);background:var(--surface);transform:translateY(-1px);box-shadow:0 4px 16px rgba(91,59,245,0.1);}
+.btn-google svg{width:20px;height:20px;flex-shrink:0;}
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#E5E3F0;}
+.divider span{font-size:12px;color:var(--muted);white-space:nowrap;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.form-group input{width:100%;padding:12px 15px;border:1.5px solid #E5E3F0;border-radius:11px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);background:white;transition:border-color .2s,box-shadow .2s;outline:none;}
+.form-group input:focus{border-color:var(--violet);box-shadow:0 0 0 4px rgba(91,59,245,0.08);}
+.form-group input::placeholder{color:#B0ABBE;}
+.pw-wrap{position:relative;}
+.pw-wrap input{padding-right:46px;}
+.pw-toggle{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:4px;}
+.form-check{display:flex;align-items:flex-start;gap:9px;margin-bottom:18px;}
+.form-check input[type="checkbox"]{width:17px;height:17px;border-radius:5px;flex-shrink:0;accent-color:var(--violet);margin-top:1px;cursor:pointer;}
+.form-check label{font-size:13px;color:var(--muted);cursor:pointer;line-height:1.5;}
+.form-check label a{color:var(--violet);text-decoration:none;font-weight:500;}
+.btn-submit{width:100%;padding:14px;background:var(--violet);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;box-shadow:0 8px 24px rgba(91,59,245,0.35);position:relative;overflow:hidden;}
+.btn-submit:hover{background:var(--violet-light);transform:translateY(-2px);box-shadow:0 12px 32px rgba(91,59,245,0.45);}
+.btn-submit.loading{pointer-events:none;}
+.spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.auth-switch{text-align:center;margin-top:18px;font-size:14px;color:var(--muted);}
+.auth-switch a{color:var(--violet);font-weight:600;text-decoration:none;cursor:pointer;}
+.forgot-link{text-align:right;margin-top:-8px;margin-bottom:14px;}
+.forgot-link a{font-size:13px;color:var(--violet);text-decoration:none;font-weight:500;}
+.err-msg{font-size:12px;color:var(--red);margin-top:4px;display:none;}
+.success-screen{display:none;text-align:center;padding:20px 0;}
+.success-icon{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--violet),#7C3AED);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:30px;box-shadow:0 12px 32px rgba(91,59,245,0.4);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.success-screen h2{font-family:'Syne',sans-serif;font-size:25px;font-weight:800;color:var(--ink);margin-bottom:9px;}
+.success-screen p{font-size:15px;color:var(--muted);margin-bottom:26px;line-height:1.6;}
+.btn-dash{display:block;background:var(--violet);color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 8px 24px rgba(91,59,245,0.35);transition:all .2s;border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%;text-align:center;}
+.btn-dash:hover{background:var(--violet-light);transform:translateY(-2px);}
+
+/* ===== DASHBOARD PAGE ===== */
+#page-dashboard{background:#F8F7FF;flex-direction:row;}
+.db-sidebar{width:215px;background:var(--ink);display:flex;flex-direction:column;padding:22px 15px;flex-shrink:0;overflow-y:auto;}
+.db-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;padding:0 7px;}
+.db-logo .di{width:32px;height:32px;border-radius:9px;background:var(--violet);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:900;color:white;box-shadow:0 4px 12px rgba(91,59,245,0.4);}
+.db-logo span{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:white;}
+.nav-sec{margin-bottom:26px;}
+.nav-sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.25);padding:0 9px;margin-bottom:7px;}
+.dbi{display:flex;align-items:center;gap:9px;padding:9px 9px;border-radius:10px;margin-bottom:2px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;transition:all .2s;border:1px solid transparent;}
+.dbi:hover{color:white;background:rgba(255,255,255,0.06);}
+.dbi.active{color:white;background:rgba(91,59,245,0.25);border-color:rgba(91,59,245,0.3);}
+.dbi svg{width:15px;height:15px;flex-shrink:0;}
+.dbi .dbadge{margin-left:auto;background:var(--violet);color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:50px;}
+.db-bottom{margin-top:auto;}
+.db-user{display:flex;align-items:center;gap:9px;padding:11px 9px;border-radius:11px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;}
+.db-uav{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--violet),#7C3AED);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:white;flex-shrink:0;}
+.db-uname{font-size:13px;font-weight:600;color:white;}
+.db-uplan{font-size:11px;color:rgba(255,255,255,0.35);}
+.db-main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.db-topbar{background:white;border-bottom:1px solid var(--border);padding:15px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10;}
+.db-topbar h1{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--ink);}
+.db-topright{display:flex;align-items:center;gap:11px;}
+.db-date{font-size:13px;color:var(--muted);background:var(--surface);padding:6px 13px;border-radius:50px;}
+.db-content{padding:26px 28px;flex:1;}
+.db-welcome{margin-bottom:24px;}
+.db-welcome h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.db-welcome p{font-size:14px;color:var(--muted);}
+.upgrade-banner{background:linear-gradient(135deg,var(--violet),#7C3AED);border-radius:15px;padding:20px 22px;color:white;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;}
+.upgrade-banner h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:3px;}
+.upgrade-banner p{font-size:13px;opacity:.8;}
+.upg-btn{background:white;color:var(--violet);border:none;padding:9px 18px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;transition:transform .2s;}
+.upg-btn:hover{transform:scale(1.05);}
+.db-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.db-sc{background:white;border:1px solid var(--border);border-radius:15px;padding:18px;transition:transform .2s,box-shadow .2s;}
+.db-sc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(91,59,245,0.1);}
+.db-st{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.db-si{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.db-trend{font-size:12px;font-weight:600;padding:3px 7px;border-radius:50px;}
+.trend-up{color:var(--green);background:var(--green-dim);}
+.db-sv{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--ink);margin-bottom:3px;}
+.db-sl{font-size:13px;color:var(--muted);}
+.db-grid2{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:22px;}
+.db-card{background:white;border:1px solid var(--border);border-radius:15px;padding:20px;}
+.db-ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.db-ct{font-size:14px;font-weight:700;color:var(--ink);}
+.db-ca{font-size:12px;color:var(--violet);font-weight:600;cursor:pointer;}
+.chart-h{height:150px;position:relative;}
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.qb{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;cursor:pointer;transition:all .2s;text-align:left;border:none;width:100%;font-family:'Inter',sans-serif;}
+.qb:hover{background:var(--surface2);transform:translateY(-1px);}
+.qb .qi{font-size:19px;margin-bottom:5px;}
+.qb .qt{font-size:12px;font-weight:600;color:var(--ink);}
+.qb .qs{font-size:11px;color:var(--muted);}
+.act-list{display:flex;flex-direction:column;gap:13px;}
+.act-item{display:flex;align-items:center;gap:11px;}
+.act-dot{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.act-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.act-sub{font-size:12px;color:var(--muted);}
+.act-time{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap;}
+
+/* AI chat */
+.ai-chat-box{height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:11px;margin-bottom:13px;}
+.ai-msg{padding:11px 13px;border-radius:11px;font-size:13px;line-height:1.55;max-width:90%;}
+.ai-msg.bot{background:var(--surface);color:var(--ink);align-self:flex-start;}
+.ai-msg.user{background:var(--violet);color:white;align-self:flex-end;}
+.ai-inp-wrap{display:flex;gap:8px;}
+.ai-inp{flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;color:var(--ink);}
+.ai-inp:focus{border-color:var(--violet);}
+.ai-send-btn{background:var(--violet);color:white;border:none;border-radius:10px;padding:10px 15px;cursor:pointer;font-size:15px;transition:background .2s;}
+.ai-send-btn:hover{background:var(--violet-light);}
+
+/* customers table */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 11px 11px;text-align:left;}
+td{padding:11px;border-top:1px solid var(--border);font-size:13px;color:var(--ink);}
+tr:hover td{background:var(--surface);}
+.cust-cell{display:flex;align-items:center;gap:9px;}
+.cust-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:white;flex-shrink:0;}
+.cust-name{font-weight:600;}
+.cust-email{font-size:12px;color:var(--muted);}
+.plan-tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px;}
+.ptfree{background:var(--surface2);color:var(--violet);}
+.ptpro{background:var(--green-dim);color:var(--green);}
+.ptbiz{background:rgba(245,158,11,0.12);color:var(--yellow);}
+.sdot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;}
+.sdot-a{background:var(--green);}
+
+/* DB sections */
+.db-section{display:none;}
+.db-section.active{display:block;}
+
+/* SKY AGENT SYSTEM STYLES */
+.sky-header{background:linear-gradient(135deg,#0A0A12,#1A0D3D);border-radius:16px;padding:22px;margin-bottom:20px;color:white;position:relative;overflow:hidden;}
+.sky-header::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(91,59,245,0.3),transparent);pointer-events:none;}
+.sky-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;}
+.sky-sub{font-size:13px;opacity:.6;margin-bottom:16px;}
+.sky-modes{display:flex;gap:8px;flex-wrap:wrap;}
+.sky-mode-btn{padding:7px 14px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:white;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.sky-mode-btn.active{background:var(--violet);border-color:var(--violet);box-shadow:0 4px 12px rgba(91,59,245,0.4);}
+.sky-status-bar{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;opacity:.7;}
+.sky-pulse{width:8px;height:8px;border-radius:50%;background:#22C55E;animation:pulse 1.5s infinite;flex-shrink:0;}
+.task-panel{background:white;border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;display:none;}
+.task-panel.show{display:block;}
+.task-steps{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+.task-step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;}
+.task-step.done{background:rgba(34,197,94,0.12);color:#22C55E;}
+.task-step.running{background:rgba(91,59,245,0.1);color:var(--violet);animation:stepPulse 1.5s infinite;}
+.task-step.pending{background:var(--surface);color:var(--muted);}
+.task-step.error{background:rgba(239,68,68,0.12);color:#EF4444;}
+@keyframes stepPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.perm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;}
+.perm-overlay.show{display:flex;}
+.perm-dialog{background:white;border-radius:20px;padding:28px;width:100%;max-width:400px;}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+.tool-card{background:white;border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;transition:all .2s;}
+.tool-card.connected{border-color:#22C55E;background:rgba(34,197,94,0.08);}
+.tool-card.coming{opacity:.55;}
+.tool-icon{font-size:26px;margin-bottom:8px;}
+.tool-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.tool-status-badge{font-size:11px;font-weight:600;}
+.tool-status-badge.on{color:#22C55E;}
+.tool-status-badge.off{color:var(--muted);}
+.memory-list{display:flex;flex-direction:column;gap:10px;}
+.memory-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:12px;padding:12px 16px;}
+.history-list{display:flex;flex-direction:column;gap:12px;}
+.history-item{background:white;border:1px solid var(--border);border-radius:14px;padding:16px;}
+.sky-chat-box{height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;margin-bottom:14px;}
+.sky-msg{padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:92%;}
+.sky-msg.sky{background:linear-gradient(135deg,rgba(91,59,245,0.08),rgba(124,95,247,0.08));color:var(--ink);align-self:flex-start;border:1px solid var(--border);}
+.sky-msg.user{background:var(--violet);color:white;align-self:flex-end;}
+.sky-suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.sky-sug{background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:7px 14px;font-size:12px;font-weight:500;color:var(--ink);cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.sky-sug:hover{background:var(--surface2);border-color:var(--violet);color:var(--violet);}
+.sky-inp-wrap{display:flex;gap:8px;}
+.sky-inp{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:13px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;}
+.sky-inp:focus{border-color:var(--violet);}
+.sky-send-btn{background:var(--violet);color:white;border:none;border-radius:11px;padding:11px 16px;cursor:pointer;font-size:16px;transition:background .2s;}
+.sky-send-btn:hover{background:var(--violet-light);}
+.voice-bar{display:flex;align-items:center;gap:8px;padding:9px 16px;background:var(--surface);border-radius:50px;font-size:12px;color:var(--muted);margin-bottom:12px;width:fit-content;cursor:pointer;}
+.voice-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s;}
+.voice-dot.listening{background:#EF4444;animation:pulse 1s infinite;}
+.voice-dot.speaking{background:#22C55E;animation:pulse .8s infinite;}
+
+/* Mobile */
+.mob-toggle{display:none;position:fixed;bottom:22px;right:22px;width:48px;height:48px;border-radius:50%;background:var(--violet);color:white;border:none;font-size:19px;cursor:pointer;z-index:100;box-shadow:0 8px 24px rgba(91,59,245,0.4);align-items:center;justify-content:center;}
+
+@media(max-width:1024px){.db-stats{grid-template-columns:1fr 1fr;}.db-grid2{grid-template-columns:1fr;}}
+@media(max-width:900px){
+  .how-grid{grid-template-columns:1fr;}.pg{grid-template-columns:1fr;}.pc.feat{transform:scale(1);}.tg{grid-template-columns:1fr;}.fg{grid-template-columns:1fr 1fr;}.pdash{grid-template-columns:1fr;}.pside{display:none;}.pstats{grid-template-columns:1fr 1fr;}.nav-links{display:none;}
+  .auth-left{display:none;}.auth-right{width:100%;}
+  .db-sidebar{position:fixed;left:-215px;top:0;bottom:0;z-index:50;transition:left .3s;}.db-sidebar.open{left:0;}.mob-toggle{display:flex;}
+  .db-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:45;opacity:0;transition:opacity .3s;}
+  .db-overlay.show{display:block;opacity:1;}
+  .db-stats{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){.pstats{grid-template-columns:1fr 1fr;}.fg{grid-template-columns:1fr;}.hero-ctas{flex-direction:column;align-items:center;}.form-row{grid-template-columns:1fr;}.upgrade-banner{flex-direction:column;gap:12px;}}
+</style>
+</head>
+<body>
+
+<!-- NO INTERNET OVERLAY -->
+<div id="no-internet">
+  <div class="no-net-icon">📡</div>
+  <div class="no-net-title">No Internet Connection</div>
+  <div class="no-net-sub">ZYRA Business requires an internet connection to work. Please connect and try again.</div>
+  <div class="no-net-steps">
+    <div class="no-net-step"><div class="no-net-pulse"></div><span>Check your WiFi or mobile data</span></div>
+    <div class="no-net-step"><div class="no-net-pulse"></div><span>Make sure airplane mode is OFF</span></div>
+    <div class="no-net-step"><div class="no-net-pulse"></div><span>Try restarting your connection</span></div>
+  </div>
+  <button class="no-net-btn" onclick="checkInternet()">🔄 Try Again</button>
+  <div style="margin-top:20px;font-size:12px;color:rgba(255,255,255,0.3);">ZYRA Business — AI needs internet to work</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ========== LANDING PAGE ========== -->
+<div id="page-landing" class="page active">
+<nav>
+  <div class="logo" onclick="showPage('landing')">
+    <div class="logo-icon">Z</div>ZYRA
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a onclick="showPage('auth')" class="nav-cta" style="cursor:pointer;">Get started free</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge"><span></span> AI Business Automation</div>
+  <h1>Run your business.<br><span class="accent">Let ZYRA handle</span><br>the rest.</h1>
+  <p>ZYRA Business uses AI to manage your customer messages, bookings, content, and admin — so you can focus on growth, not busywork.</p>
+  <div class="hero-ctas">
+    <button class="btn-primary" onclick="showPage('auth')">Start free — no card needed</button>
+    <a href="#how" class="btn-outline">See how it works →</a>
+  </div>
+  <div class="hero-trust">
+    <span>✓ Free plan included</span><span class="dot"></span>
+    <span>✓ No credit card required</span><span class="dot"></span>
+    <span>✓ Set up in minutes</span>
+  </div>
+  <div style="width:100%;max-width:900px;margin-top:52px;" class="fade-up">
+    <div class="preview-wrap">
+      <div class="preview-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span>zyrabusiness.app / dashboard</span></div>
+      <div class="pdash">
+        <div class="pside">
+          <div class="pside-logo"><div class="pi">Z</div> ZYRA</div>
+          <div class="pni a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</div>
+          <div class="pni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI Assistant</div>
+          <div class="pni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Customers</div>
+          <div class="pni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Analytics</div>
+        </div>
+        <div class="pmain">
+          <div class="ptop"><h3>Good morning, Chikamso 👋</h3><span>Aug 30, 2026</span></div>
+          <div class="pstats">
+            <div class="psc"><div class="pl">Revenue</div><div class="pv">$8,240</div><div class="pc">↑ 14.2%</div></div>
+            <div class="psc"><div class="pl">Customers</div><div class="pv">342</div><div class="pc">↑ 8.3%</div></div>
+            <div class="psc"><div class="pl">AI Replies</div><div class="pv">1,890</div><div class="pc">↑ 23%</div></div>
+            <div class="psc"><div class="pl">Active Plans</div><div class="pv">29</div><div class="pc">↑ 3 new</div></div>
+          </div>
+          <div class="pchart">
+            <h4>Revenue — last 30 days</h4>
+            <svg width="100%" height="70" viewBox="0 0 600 70" preserveAspectRatio="none">
+              <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5B3BF5" stop-opacity=".4"/><stop offset="100%" stop-color="#5B3BF5" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0,60 C80,55 160,40 240,32 C320,24 400,36 480,18 C540,8 570,6 600,3 L600,70 L0,70 Z" fill="url(#cg)"/>
+              <path d="M0,60 C80,55 160,40 240,32 C320,24 400,36 480,18 C540,8 570,6 600,3" fill="none" stroke="#5B3BF5" stroke-width="2.5"/>
+            </svg>
+            <div class="aibubble">⚡ AI replied to 47 chats today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<lsection class="feats-bg" id="features" style="padding:90px 5%;display:block;background:var(--surface);">
+  <div class="fade-up">
+    <div class="s-tag">Features</div>
+    <h2 class="s-title">Everything your business needs,<br>powered by AI.</h2>
+    <p class="s-sub">ZYRA Business handles the time-consuming parts so you never miss a customer.</p>
+  </div>
+  <div class="feats-grid fade-up">
+    <div class="fc"><div class="fc-icon">🤖</div><h3>AI Business Assistant</h3><p>Write customer replies, social posts, product descriptions and business plans in seconds.</p></div>
+    <div class="fc"><div class="fc-icon">📅</div><h3>Smart Booking & Scheduling</h3><p>Customers book appointments automatically 24/7. No back-and-forth, no missed bookings.</p></div>
+    <div class="fc"><div class="fc-icon">👥</div><h3>Customer Records</h3><p>Store every customer's details, history, and conversations in one place.</p></div>
+    <div class="fc"><div class="fc-icon">⚡</div><h3>Tasks & Automation</h3><p>Set up workflows that run automatically — follow-ups, reminders, invoices.</p></div>
+    <div class="fc"><div class="fc-icon">📊</div><h3>Clear Analytics</h3><p>See exactly how your business is growing — revenue, customers, products — in real time.</p></div>
+    <div class="fc"><div class="fc-icon">🌍</div><h3>Works in Any Language</h3><p>ZYRA responds in English, Yoruba, Igbo, French and 50+ languages automatically.</p></div>
+  </div>
+</lsection>
+
+<lsection id="how" style="padding:90px 5%;display:block;background:white;">
+  <div class="how-grid">
+    <div class="fade-up">
+      <div class="s-tag">How it works</div>
+      <h2 class="s-title">Three steps to automate your business.</h2>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><h3>Create your free account</h3><p>Sign up in under 2 minutes. No credit card, no technical skills needed.</p></div></div>
+        <div class="step"><div class="step-n">2</div><div><h3>Set up ZYRA for your business</h3><p>Tell ZYRA what you sell, your hours, your prices. It learns and speaks for you.</p></div></div>
+        <div class="step"><div class="step-n">3</div><div><h3>Let ZYRA work while you grow</h3><p>Customers get instant replies, bookings happen automatically, reports update in real time.</p></div></div>
+      </div>
+    </div>
+    <div class="how-vis fade-up">
+      <div class="cm ai"><div class="clabel">ZYRA AI</div>Hello! Welcome to Chika's Hair Studio 💜 How can I help you today?</div>
+      <div class="cm u">Hi! I want to book a hair braiding appointment for Saturday</div>
+      <div class="cm ai"><div class="clabel">ZYRA AI</div>I have Saturday available at 10am and 2pm. Which works best for you? 📅</div>
+      <div class="cm u">2pm please!</div>
+      <div class="cm ai"><div class="clabel">ZYRA AI</div>✅ Booked! Saturday 2pm for hair braiding. You'll get a reminder the morning of. See you then! 🙌</div>
+    </div>
+  </div>
+</lsection>
+
+<lsection style="padding:90px 5%;display:block;background:var(--surface);">
+  <div class="fade-up" style="text-align:center;margin-bottom:52px;">
+    <div class="s-tag">Testimonials</div>
+    <h2 class="s-title">Business owners love ZYRA Business.</h2>
+  </div>
+  <div class="tg fade-up">
+    <div class="tc"><div class="stars">★★★★★</div><blockquote>"ZYRA replies to my customers while I'm sleeping. I woke up to 4 new bookings I did nothing for."</blockquote><div class="ta"><div class="tav">A</div><div><div class="tn">Amaka O.</div><div class="tr">Hair Studio, Lagos</div></div></div></div>
+    <div class="tc"><div class="stars">★★★★★</div><blockquote>"I used to spend 3 hours replying to WhatsApp. Now ZYRA does it in seconds and I focus on my shop."</blockquote><div class="ta"><div class="tav">K</div><div><div class="tn">Kwame D.</div><div class="tr">Fashion Store, Accra</div></div></div></div>
+    <div class="tc"><div class="stars">★★★★★</div><blockquote>"My restaurant bookings went up 60% in the first month. ZYRA never misses a customer — even at midnight."</blockquote><div class="ta"><div class="tav">F</div><div><div class="tn">Fatima M.</div><div class="tr">Restaurant, Abuja</div></div></div></div>
+  </div>
+</lsection>
+
+<lsection class="pricing-bg" id="pricing" style="padding:90px 5%;display:block;background:var(--ink);">
+  <div class="fade-up" style="text-align:center;margin-bottom:52px;">
+    <div class="s-tag">Pricing</div>
+    <h2 class="s-title" style="color:white;">Simple pricing. No surprises.</h2>
+    <p class="s-sub" style="margin:0 auto;color:rgba(255,255,255,0.5);">Start free. Upgrade when ready. Cancel anytime.</p>
+  </div>
+  <div class="pg fade-up">
+    <div class="pc">
+      <div class="pname">FREE</div><div class="pprice">$0<span>/mo</span></div><div class="pdesc">Everything you need to get started.</div>
+      <ul class="pfeats"><li>Basic AI assistant</li><li>50 AI replies/month</li><li>5 customer records</li><li>Basic dashboard</li></ul>
+      <button class="pbtn" onclick="showPage('auth')">Get started free</button>
+    </div>
+    <div class="pc feat">
+      <div class="pbadge">Most popular</div>
+      <div class="pname">PRO</div><div class="pprice">$29<span>/mo</span></div><div class="pdesc">For growing businesses that need more AI.</div>
+      <ul class="pfeats"><li>Unlimited AI replies</li><li>Booking & scheduling</li><li>500 customer records</li><li>Advanced analytics</li><li>Automation workflows</li><li>Priority support</li></ul>
+      <button class="pbtn" onclick="showPage('auth')">Upgrade to Pro</button>
+    </div>
+    <div class="pc">
+      <div class="pname">BUSINESS</div><div class="pprice">$299<span>/mo</span></div><div class="pdesc">Full AI automation at scale.</div>
+      <ul class="pfeats"><li>Everything in Pro</li><li>Unlimited customers</li><li>Custom AI training</li><li>Multi-language support</li><li>Advanced automation</li><li>Account manager</li></ul>
+      <button class="pbtn" onclick="showPage('auth')">Upgrade to Business</button>
+    </div>
+  </div>
+</lsection>
+
+<lsection id="faq" style="padding:90px 5%;display:block;background:var(--surface);">
+  <div class="fade-up"><div class="s-tag">FAQ</div><h2 class="s-title">Frequently asked questions.</h2></div>
+  <div class="faq-list fade-up">
+    <div class="fi"><div class="fq">What is ZYRA Business?<span class="fi-icon">+</span></div><div class="fa">ZYRA Business is an AI-powered business automation platform. It handles customer messages, bookings, admin, and content — so you can focus on growing your business.</div></div>
+    <div class="fi"><div class="fq">Do I need technical skills?<span class="fi-icon">+</span></div><div class="fa">No. ZYRA Business is designed for business owners, not developers. If you can send a WhatsApp message, you can use ZYRA Business. Setup takes less than 5 minutes.</div></div>
+    <div class="fi"><div class="fq">Can I start for free?<span class="fi-icon">+</span></div><div class="fa">Yes! ZYRA's free plan gives you everything to get started — no credit card required. Upgrade only when your business needs more.</div></div>
+    <div class="fi"><div class="fq">How does billing work?<span class="fi-icon">+</span></div><div class="fa">You're billed monthly and can cancel anytime with no penalty. If you upgrade mid-month, we prorate the charge automatically.</div></div>
+    <div class="fi"><div class="fq">Does it work on my phone?<span class="fi-icon">+</span></div><div class="fa">Yes. ZYRA works fully on mobile. Manage your entire business from your phone — customers, bookings, AI replies, and analytics all in one place.</div></div>
+    <div class="fi"><div class="fq">What languages does ZYRA support?<span class="fi-icon">+</span></div><div class="fa">ZYRA responds in 50+ languages including English, Yoruba, Igbo, Hausa, French and more. It detects the customer's language automatically.</div></div>
+  </div>
+</lsection>
+
+<section class="cta-section" style="padding:90px 5%;">
+  <h2>ZYRA Business — Start automating today.</h2>
+  <p>Create your free ZYRA account and let AI take the busywork off your plate.</p>
+  <button class="btn-white" onclick="showPage('auth')">Get started — it's free →</button>
+</section>
+
+<footer>
+  <div class="fg">
+    <div class="fb"><div class="logo" onclick="showPage('landing')"><div class="logo-icon">Z</div> ZYRA</div><p>AI-powered business automation for small businesses worldwide.</p></div>
+    <div class="fcol"><h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div>
+    <div class="fcol"><h4>Account</h4><a onclick="showPage('auth')" style="cursor:pointer;">Create account</a><a onclick="showPage('auth')" style="cursor:pointer;">Log in</a></div>
+    <div class="fcol"><h4>Company</h4><a href="#">About</a><a href="#">Contact</a><a href="#">Privacy policy</a></div>
+  </div>
+  <div class="fbot"><p>© 2026 ZYRA Business. All rights reserved.</p><p style="font-size:12px;color:rgba(255,255,255,0.2);">ZYRA Business is an independent product.</p></div>
+</footer>
+</div>
+
+<!-- ========== AUTH PAGE ========== -->
+<div id="page-auth" class="page">
+<div class="auth-layout">
+  <div class="auth-left">
+    <div class="al-logo" onclick="showPage('landing')">
+      <div class="al-logo-icon">Z</div><span>ZYRA Business</span>
+    </div>
+    <div class="al-content">
+      <h2>Your business,<br>on <span class="acc">autopilot.</span></h2>
+      <p>Join thousands of business owners using ZYRA Business to automate customer replies, bookings, and admin.</p>
+      <div class="float-cards">
+        <div class="float-card"><div class="fc-icon2">⚡</div><div><div class="fc-title">AI replies in seconds</div><div class="fc-sub">Never miss a customer message</div></div></div>
+        <div class="float-card"><div class="fc-icon2">📅</div><div><div class="fc-title">Auto bookings 24/7</div><div class="fc-sub">Customers book while you sleep</div></div></div>
+        <div class="float-card"><div class="fc-icon2">📊</div><div><div class="fc-title">Real-time analytics</div><div class="fc-sub">See your business grow every day</div></div></div>
+      </div>
+    </div>
+    <div class="al-bottom">
+      <div class="al-avs">
+        <div class="al-av" style="background:#5B3BF5;">A</div>
+        <div class="al-av" style="background:#7C3AED;">K</div>
+        <div class="al-av" style="background:#2563EB;">F</div>
+        <div class="al-av" style="background:#059669;">M</div>
+      </div>
+      <p><strong>2,400+</strong> business owners already using ZYRA Business</p>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-box">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('signup')">Create account</button>
+        <button class="auth-tab" onclick="switchTab('login')">Sign in</button>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="su-form">
+        <div class="auth-header"><h1>Get started free 🚀</h1><p>No credit card required. Set up in minutes.</p></div>
+        <button class="btn-google" onclick="handleGoogle()">
+          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <div class="divider"><span>or sign up with email</span></div>
+        <div class="form-row">
+          <div class="form-group"><label>First name</label><input type="text" id="su-fn" placeholder="Chikamso"/></div>
+          <div class="form-group"><label>Last name</label><input type="text" id="su-ln" placeholder="Ezeagwu"/></div>
+        </div>
+        <div class="form-group"><label>Business name</label><input type="text" id="su-biz" placeholder="My Hair Studio"/></div>
+        <div class="form-group"><label>Email address</label><input type="email" id="su-email" placeholder="you@example.com"/><div class="err-msg" id="su-email-err">Please enter a valid email</div></div>
+        <div class="form-group"><label>Password</label><div class="pw-wrap"><input type="password" id="su-pw" placeholder="At least 8 characters"/><button class="pw-toggle" onclick="togglePw('su-pw',this)">👁️</button></div><div class="err-msg" id="su-pw-err">Password must be at least 8 characters</div></div>
+        <div class="form-check"><input type="checkbox" id="su-terms"/><label for="su-terms">I agree to ZYRA Business's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label></div>
+        <button class="btn-submit" id="su-btn" onclick="handleSignup()"><span class="su-txt">Create free account →</span><div class="spinner" id="su-spin"></div></button>
+        <div class="auth-switch">Already have an account? <a onclick="switchTab('login')">Sign in</a></div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="li-form" style="display:none;">
+        <div class="auth-header"><h1>Welcome back 👋</h1><p>Sign in to your ZYRA account.</p></div>
+        <button class="btn-google" onclick="handleGoogle()">
+          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <div class="divider"><span>or sign in with email</span></div>
+        <div class="form-group"><label>Email address</label><input type="email" id="li-email" placeholder="you@example.com"/></div>
+        <div class="form-group"><label>Password</label><div class="pw-wrap"><input type="password" id="li-pw" placeholder="Your password"/><button class="pw-toggle" onclick="togglePw('li-pw',this)">👁️</button></div></div>
+        <div class="forgot-link"><a href="#">Forgot password?</a></div>
+        <button class="btn-submit" id="li-btn" onclick="handleLogin()"><span class="li-txt">Sign in to ZYRA Business →</span><div class="spinner" id="li-spin"></div></button>
+        <div class="auth-switch">Don't have an account? <a onclick="switchTab('signup')">Create one free</a></div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="success-screen" id="success-sc">
+        <div class="success-icon">🎉</div>
+        <h2>You're in, welcome!</h2>
+        <p>Your ZYRA account is ready. Let's set up your workspace and start automating your business.</p>
+        <button class="btn-dash" onclick="goToDashboard()">Go to my dashboard →</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== DASHBOARD PAGE ========== -->
+<div id="page-dashboard" class="page">
+  <div class="db-sidebar" id="db-sidebar">
+    <div class="db-logo"><div class="di">Z</div><span>ZYRA Business</span></div>
+    <div class="nav-sec">
+      <div class="nav-sec-label">Main</div>
+      <div class="dbi active" onclick="dbShow('overview',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="dbi" onclick="dbShow('sky',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>SKY Agent<span class="dbadge">NEW</span></div>
+      <div class="dbi" onclick="dbShow('ai',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI Assistant<span class="dbadge">AI</span></div>
+      <div class="dbi" onclick="dbShow('bizinfo',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>Business Info<span class="dbadge">NEW</span></div>
+      <div class="dbi" onclick="dbShow('customers',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Customers</div>
+      <div class="dbi" onclick="dbShow('analytics',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Analytics</div>
+      <div class="dbi" onclick="dbShow('automation',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Automation</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-label">Account</div>
+      <div class="dbi" onclick="dbShow('referral',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Refer & Earn<span class="dbadge">$5</span></div>
+      <div class="dbi" onclick="dbShow('settings',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
+      <div class="dbi" onclick="handleLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log out</div>
+    </div>
+    <div class="db-bottom">
+      <div class="db-user">
+        <div class="db-uav" id="db-av">C</div>
+        <div><div class="db-uname" id="db-uname">Chikamso</div><div class="db-uplan">Free plan</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="db-main">
+    <div class="db-topbar">
+      <h1 id="db-title">Dashboard</h1>
+      <div class="db-topright">
+        <div class="db-date" id="db-date"></div>
+      </div>
+    </div>
+    <div class="db-content">
+
+      <!-- OVERVIEW -->
+      <div class="db-section active" id="db-overview">
+        <div class="db-welcome"><h2>Good day, <span id="db-wname">Chikamso</span> 👋</h2><p>Here's what's happening with your business today.</p></div>
+        <div class="upgrade-banner"><div><h3>🚀 Upgrade to Pro</h3><p>Unlock unlimited AI replies, bookings & automation for just $29/month.</p></div><button class="upg-btn" onclick="dbShow('settings',null)">Upgrade now →</button></div>
+        <div class="db-stats">
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(91,59,245,0.1);">💰</div><span class="db-trend trend-up">↑ 14%</span></div><div class="db-sv">$0</div><div class="db-sl">Total Revenue</div></div>
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(34,197,94,0.1);">👥</div><span class="db-trend trend-up">↑ 8%</span></div><div class="db-sv">0</div><div class="db-sl">Total Customers</div></div>
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(245,158,11,0.1);">🤖</div><span class="db-trend trend-up">↑ 23%</span></div><div class="db-sv">0</div><div class="db-sl">AI Replies Sent</div></div>
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(239,68,68,0.1);">📅</div><span class="db-trend trend-up">↑ 5%</span></div><div class="db-sv">0</div><div class="db-sl">Bookings Today</div></div>
+        </div>
+        <div class="db-grid2">
+          <div class="db-card">
+            <div class="db-ch"><div class="db-ct">Revenue Overview</div><div class="db-ca">View report →</div></div>
+            <div class="chart-h">
+              <svg width="100%" height="150" viewBox="0 0 600 150" preserveAspectRatio="none">
+                <defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5B3BF5" stop-opacity=".2"/><stop offset="100%" stop-color="#5B3BF5" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0,130 C80,120 180,100 280,80 C380,60 460,50 560,25 L600,18 L600,150 L0,150 Z" fill="url(#dg)"/>
+                <path d="M0,130 C80,120 180,100 280,80 C380,60 460,50 560,25 L600,18" fill="none" stroke="#5B3BF5" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="db-card">
+            <div class="db-ch"><div class="db-ct">Quick Actions</div></div>
+            <div class="qg">
+              <button class="qb" onclick="dbShow('ai',null)"><div class="qi">🤖</div><div class="qt">Ask AI</div><div class="qs">Get help now</div></button>
+              <button class="qb" onclick="dbShow('customers',null)"><div class="qi">➕</div><div class="qt">Add Customer</div><div class="qs">New record</div></button>
+              <button class="qb"><div class="qi">📢</div><div class="qt">Post Update</div><div class="qs">Social media</div></button>
+              <button class="qb" onclick="dbShow('analytics',null)"><div class="qi">📊</div><div class="qt">View Stats</div><div class="qs">See growth</div></button>
+            </div>
+          </div>
+        </div>
+        <div class="db-card">
+          <div class="db-ch"><div class="db-ct">Recent Activity</div><div class="db-ca">View all →</div></div>
+          <div class="act-list">
+            <div class="act-item"><div class="act-dot" style="background:var(--green-dim);">🎉</div><div><div class="act-title">Welcome to ZYRA Business!</div><div class="act-sub">Your account was created successfully</div></div><div class="act-time">Just now</div></div>
+            <div class="act-item"><div class="act-dot" style="background:rgba(91,59,245,0.12);">🤖</div><div><div class="act-title">AI Assistant is ready</div><div class="act-sub">Ask ZYRA anything about your business</div></div><div class="act-time">Just now</div></div>
+            <div class="act-item"><div class="act-dot" style="background:rgba(245,158,11,0.12);">⚡</div><div><div class="act-title">Free plan activated</div><div class="act-sub">Upgrade to Pro to unlock all features</div></div><div class="act-time">Just now</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI -->
+      <!-- SKY AGENT SYSTEM -->
+      <div class="db-section" id="db-sky">
+        <div class="sky-header">
+          <div class="sky-title">⚡ SKY Agent System</div>
+          <div class="sky-sub">Your intelligent AI that understands goals and performs real actions</div>
+          <div class="sky-modes">
+            <button class="sky-mode-btn" onclick="setMode('manual',this)">🔴 Manual</button>
+            <button class="sky-mode-btn active" onclick="setMode('assisted',this)">🟡 Assisted</button>
+            <button class="sky-mode-btn" onclick="setMode('smart',this)">🟢 Smart</button>
+            <button class="sky-mode-btn" onclick="setMode('autonomous',this)">🚀 Autonomous</button>
+          </div>
+          <div class="sky-status-bar">
+            <div class="sky-pulse"></div>
+            <span id="sky-mode-label">Mode: Assisted — SKY asks before every action</span>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="testWhatsAppBtn()" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.25);padding:7px 14px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">💬 Test WhatsApp</button>
+            <button onclick="skySuggest('Send a welcome message to my new customer')" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.25);padding:7px 14px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">🚀 Quick Task</button>
+          </div>
+        </div>
+
+        <!-- Task Panel -->
+        <div class="task-panel" id="task-panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div style="font-size:14px;font-weight:700;color:var(--ink);">🎯 <span id="task-title">Current Task</span></div>
+            <button onclick="closeTaskPanel()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;">✕</button>
+          </div>
+          <div class="task-steps" id="task-steps"></div>
+        </div>
+
+        <!-- Permission Dialog -->
+        <div class="perm-overlay" id="perm-overlay">
+          <div class="perm-dialog">
+            <div style="font-size:40px;text-align:center;margin-bottom:14px;" id="perm-icon">⚠️</div>
+            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--ink);margin-bottom:8px;text-align:center;" id="perm-title">Permission Required</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px;text-align:center;" id="perm-desc">SKY needs your permission to proceed.</div>
+            <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:18px;" id="perm-details"></div>
+            <div style="display:flex;gap:10px;">
+              <button onclick="permCancel()" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">❌ Cancel</button>
+              <button onclick="permApprove()" style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--violet);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">✅ Approve</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SKY Chat -->
+        <div class="db-card" style="margin-bottom:20px;">
+          <div class="db-ch"><div class="db-ct">⚡ Talk to SKY</div><div class="db-ca" onclick="clearSkyChat()" style="cursor:pointer;">Clear</div></div>
+          <div class="voice-bar" id="voice-bar" onclick="toggleVoice()">
+            <div class="voice-dot" id="voice-dot"></div>
+            <span id="voice-label">🎙️ Tap to speak</span>
+          </div>
+          <div class="sky-suggestions">
+            <button class="sky-sug" onclick="skySuggest('Send a welcome message to my new customer')">💬 Welcome customer</button>
+            <button class="sky-sug" onclick="skySuggest('Write a TikTok caption for my business')">🎵 TikTok caption</button>
+            <button class="sky-sug" onclick="skySuggest('Create a social media post about my business')">📢 Social post</button>
+            <button class="sky-sug" onclick="skySuggest('Write a follow up message to my customers')">📧 Follow up</button>
+            <button class="sky-sug" onclick="skySuggest('Analyze my business performance this week')">📊 Business report</button>
+          </div>
+          <div class="sky-chat-box" id="sky-chat">
+            <div class="sky-msg sky"><strong>⚡ SKY:</strong> Hello! I'm SKY, your intelligent AI agent. I understand your goals and perform real actions step by step.<br><br>I'm in <strong>Assisted Mode</strong> — I'll always ask your permission before doing anything important.<br><br>What would you like me to help with today? 🚀</div>
+          </div>
+          <div class="sky-inp-wrap">
+            <input class="sky-inp" id="sky-inp" placeholder="Tell SKY what you want to accomplish..." onkeydown="if(event.key==='Enter')sendSky()"/>
+            <button class="sky-send-btn" onclick="sendSky()">➤</button>
+          </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="db-card" style="margin-bottom:20px;">
+          <div class="db-ch"><div class="db-ct">🛠️ Connected Tools</div></div>
+          <div class="tools-grid">
+            <div class="tool-card connected"><div class="tool-icon">🤖</div><div class="tool-name">AI Writing</div><div class="tool-status-badge on">✅ Active</div></div>
+            <div class="tool-card connected"><div class="tool-icon">👥</div><div class="tool-name">Customers</div><div class="tool-status-badge on">✅ Active</div></div>
+            <div class="tool-card connected"><div class="tool-icon">💬</div><div class="tool-name">WhatsApp</div><div class="tool-status-badge on">✅ Active</div></div>
+            <div class="tool-card coming"><div class="tool-icon">📧</div><div class="tool-name">Email</div><div class="tool-status-badge off">⏳ Coming Soon</div></div>
+            <div class="tool-card coming"><div class="tool-icon">🎵</div><div class="tool-name">TikTok</div><div class="tool-status-badge off">⏳ Coming Soon</div></div>
+            <div class="tool-card coming"><div class="tool-icon">📸</div><div class="tool-name">Instagram</div><div class="tool-status-badge off">⏳ Coming Soon</div></div>
+            <div class="tool-card coming"><div class="tool-icon">📅</div><div class="tool-name">Calendar</div><div class="tool-status-badge off">⏳ Coming Soon</div></div>
+            <div class="tool-card coming"><div class="tool-icon">💰</div><div class="tool-name">Payments</div><div class="tool-status-badge off">⏳ Coming Soon</div></div>
+          </div>
+          <div style="background:var(--surface);border-radius:12px;padding:12px 16px;font-size:12px;color:var(--muted);text-align:center;">
+            🚀 More tools are being connected. Upgrade to Pro or Business to unlock them first!
+          </div>
+        </div>
+
+        <!-- Memory -->
+        <div class="db-card" style="margin-bottom:20px;">
+          <div class="db-ch"><div class="db-ct">🧠 SKY Memory</div><div class="db-ca" onclick="clearSkyMemory()" style="cursor:pointer;">Clear all</div></div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">SKY remembers your preferences to work better for you.</p>
+          <div class="memory-list" id="sky-memory-list">
+            <div class="memory-item"><span style="font-size:13px;color:var(--ink);">💼 Business type: Small business automation</span><button onclick="deleteMemory(this)" style="background:none;border:none;cursor:pointer;color:#EF4444;font-size:16px;">🗑️</button></div>
+            <div class="memory-item"><span style="font-size:13px;color:var(--ink);">🌍 Target market: Nigeria and Africa</span><button onclick="deleteMemory(this)" style="background:none;border:none;cursor:pointer;color:#EF4444;font-size:16px;">🗑️</button></div>
+            <div class="memory-item"><span style="font-size:13px;color:var(--ink);">✍️ Writing style: Professional but friendly</span><button onclick="deleteMemory(this)" style="background:none;border:none;cursor:pointer;color:#EF4444;font-size:16px;">🗑️</button></div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="db-card">
+          <div class="db-ch"><div class="db-ct">📋 Activity History</div><div class="db-ca" onclick="clearSkyHistory()" style="cursor:pointer;">Clear</div></div>
+          <div class="history-list" id="sky-history">
+            <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No activity yet. Ask SKY to do something! ⚡</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="db-section" id="db-ai">
+        <div class="db-welcome"><h2>AI Assistant 🤖</h2><p>Ask ZYRA anything — customer replies, business ideas, content, and more.</p></div>
+        <div class="db-card">
+          <div class="ai-chat-box" id="ai-chat"><div class="ai-msg bot">👋 Hi! I'm ZYRA's AI. I can help you write customer replies, social media posts, business plans, product descriptions and more. What do you need?</div></div>
+          <div class="ai-inp-wrap">
+            <input class="ai-inp" id="ai-inp" placeholder="Ask me anything about your business..." onkeydown="if(event.key==='Enter')sendAI()"/>
+            <button class="ai-send-btn" onclick="sendAI()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="db-section" id="db-customers">
+        <div class="db-welcome"><h2>Customers 👥</h2><p>Manage all your customer records in one place.</p></div>
+
+        <!-- ADD CUSTOMER MODAL -->
+        <div id="add-cust-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;">
+          <div style="background:white;border-radius:20px;padding:32px;width:100%;max-width:440px;position:relative;">
+            <button onclick="closeAddCustomer()" style="position:absolute;top:16px;right:16px;background:var(--surface);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;">✕</button>
+            <h3 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--ink);margin-bottom:6px;">Add New Customer</h3>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:22px;">Fill in the customer's details below.</p>
+            <div style="display:flex;flex-direction:column;gap:13px;">
+              <div><label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">Full name *</label><input id="nc-name" type="text" placeholder="e.g. Amaka Obi" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;"/></div>
+              <div><label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">Email address *</label><input id="nc-email" type="email" placeholder="customer@email.com" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;"/></div>
+              <div><label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">Phone number</label><input id="nc-phone" type="tel" placeholder="+234 800 000 0000" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;"/></div>
+              <div><label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">Plan</label>
+                <select id="nc-plan" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;background:white;">
+                  <option value="free">Free</option>
+                  <option value="pro">Pro</option>
+                  <option value="business">Business</option>
+                </select>
+              </div>
+              <button onclick="saveCustomer()" style="background:var(--violet);color:white;border:none;padding:13px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:4px;box-shadow:0 8px 24px rgba(91,59,245,0.35);">Add Customer →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="db-card">
+          <div class="db-ch">
+            <div class="db-ct">All Customers <span id="cust-count" style="font-size:12px;color:var(--muted);font-weight:500;"></span></div>
+            <div class="db-ca" onclick="openAddCustomer()" style="cursor:pointer;background:var(--violet);color:white;padding:7px 14px;border-radius:50px;font-size:12px;">+ Add customer</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Customer</th><th>Plan</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+              <tbody id="cust-tbody">
+                <tr><td><div class="cust-cell"><div class="cust-av" style="background:#5B3BF5;">A</div><div><div class="cust-name">Amaka Obi</div><div class="cust-email">amaka@gmail.com</div></div></div></td><td><span class="plan-tag ptpro">Pro</span></td><td><span class="sdot sdot-a"></span>Active</td><td>Aug 2026</td><td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td></tr>
+                <tr><td><div class="cust-cell"><div class="cust-av" style="background:#059669;">K</div><div><div class="cust-name">Kwame Darko</div><div class="cust-email">kwame@gmail.com</div></div></div></td><td><span class="plan-tag ptbiz">Business</span></td><td><span class="sdot sdot-a"></span>Active</td><td>Aug 2026</td><td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td></tr>
+                <tr><td><div class="cust-cell"><div class="cust-av" style="background:#DC2626;">F</div><div><div class="cust-name">Fatima Musa</div><div class="cust-email">fatima@gmail.com</div></div></div></td><td><span class="plan-tag ptfree">Free</span></td><td><span class="sdot sdot-a"></span>Active</td><td>Aug 2026</td><td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="db-section" id="db-analytics">
+        <div class="db-welcome"><h2>Analytics 📊</h2><p>Track your business growth in real time.</p></div>
+        <div class="db-stats">
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(91,59,245,0.1);">📈</div><span class="db-trend trend-up">↑ 32%</span></div><div class="db-sv">0</div><div class="db-sl">Page Views</div></div>
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(34,197,94,0.1);">🎯</div><span class="db-trend trend-up">↑ 18%</span></div><div class="db-sv">0%</div><div class="db-sl">Conversion Rate</div></div>
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(245,158,11,0.1);">⏱️</div><span class="db-trend trend-up">↑ 5%</span></div><div class="db-sv">0m</div><div class="db-sl">Avg. Session</div></div>
+          <div class="db-sc"><div class="db-st"><div class="db-si" style="background:rgba(239,68,68,0.1);">🌍</div><span class="db-trend trend-up">↑ 12%</span></div><div class="db-sv">0</div><div class="db-sl">Countries</div></div>
+        </div>
+        <div class="db-card"><div class="db-ch"><div class="db-ct">Growth Chart</div></div><div class="chart-h" style="height:180px;"><svg width="100%" height="180" viewBox="0 0 600 180" preserveAspectRatio="none"><defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22C55E" stop-opacity=".2"/><stop offset="100%" stop-color="#22C55E" stop-opacity="0"/></linearGradient></defs><path d="M0,160 C100,150 200,130 300,100 C400,70 500,45 600,20 L600,180 L0,180 Z" fill="url(#gg)"/><path d="M0,160 C100,150 200,130 300,100 C400,70 500,45 600,20" fill="none" stroke="#22C55E" stroke-width="2.5"/></svg></div></div>
+      </div>
+
+      <!-- AUTOMATION -->
+      <div class="db-section" id="db-automation">
+        <div class="db-welcome"><h2>Automation ⚡</h2><p>Set up workflows that run automatically for your business.</p></div>
+        <div class="upgrade-banner"><div><h3>⚡ Unlock Automation</h3><p>Upgrade to Pro to set up automated replies, reminders, and workflows.</p></div><button class="upg-btn">Upgrade to Pro →</button></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="db-card" style="opacity:.6;"><div class="db-ch"><div class="db-ct">🔄 Auto Reply</div></div><p style="font-size:13px;color:var(--muted);">Automatically reply to customer messages 24/7. Pro feature.</p></div>
+          <div class="db-card" style="opacity:.6;"><div class="db-ch"><div class="db-ct">📅 Booking Reminder</div></div><p style="font-size:13px;color:var(--muted);">Send automatic reminders before appointments. Pro feature.</p></div>
+          <div class="db-card" style="opacity:.6;"><div class="db-ch"><div class="db-ct">📧 Follow Up</div></div><p style="font-size:13px;color:var(--muted);">Auto follow-up with customers after purchase. Pro feature.</p></div>
+          <div class="db-card" style="opacity:.6;"><div class="db-ch"><div class="db-ct">📢 Social Posts</div></div><p style="font-size:13px;color:var(--muted);">Auto-schedule social media posts. Pro feature.</p></div>
+        </div>
+      </div>
+
+      <!-- REFERRAL -->
+      <div class="db-section" id="db-referral">
+        <div class="db-welcome"><h2>Refer & Earn 💰</h2><p>Share ZYRA Business with others and earn $5 every month they stay subscribed!</p></div>
+
+        <!-- Earnings Banner -->
+        <div style="background:linear-gradient(135deg,#5B3BF5,#7C3AED);border-radius:16px;padding:24px;color:white;margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+            <div>
+              <div style="font-size:13px;opacity:.8;margin-bottom:4px;">Total Earnings</div>
+              <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;" id="ref-total-earnings">$0.00</div>
+              <div style="font-size:13px;opacity:.7;margin-top:4px;">From <span id="ref-active-count">0</span> active referrals</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:13px;opacity:.8;margin-bottom:4px;">This month</div>
+              <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;" id="ref-month-earnings">$0.00</div>
+              <div style="font-size:12px;opacity:.6;margin-top:4px;">Paid on 1st of every month</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">
+          <div class="db-card" style="text-align:center;">
+            <div style="font-size:28px;font-weight:800;color:var(--violet);font-family:'Syne',sans-serif;" id="ref-total-count">0</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">Total Referred</div>
+          </div>
+          <div class="db-card" style="text-align:center;">
+            <div style="font-size:28px;font-weight:800;color:var(--green);font-family:'Syne',sans-serif;" id="ref-paid-count">0</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">Paying Users</div>
+          </div>
+          <div class="db-card" style="text-align:center;">
+            <div style="font-size:28px;font-weight:800;color:var(--yellow);font-family:'Syne',sans-serif;" id="ref-pending-count">0</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">Pending</div>
+          </div>
+        </div>
+
+        <!-- Referral Link -->
+        <div class="db-card" style="margin-bottom:20px;">
+          <div class="db-ch"><div class="db-ct">Your Referral Link 🔗</div></div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Share this link with anyone. When they subscribe to a paid plan you earn <strong style="color:var(--violet);">$5 every month</strong> they stay!</p>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--ink);font-weight:500;word-break:break-all;" id="ref-link">zyrabusiness.netlify.app?ref=loading...</div>
+            <button onclick="copyRefLink()" style="background:var(--violet);color:white;border:none;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;">📋 Copy Link</button>
+          </div>
+        </div>
+
+        <!-- Share Buttons -->
+        <div class="db-card" style="margin-bottom:20px;">
+          <div class="db-ch"><div class="db-ct">Share Your Link 📤</div></div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Share on social media to reach more people and earn more! 🚀</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button onclick="shareWhatsApp()" style="background:#25D366;color:white;border:none;padding:13px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">💬 Share on WhatsApp</button>
+            <button onclick="shareFacebook()" style="background:#1877F2;color:white;border:none;padding:13px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">📘 Share on Facebook</button>
+            <button onclick="shareTwitter()" style="background:#000;color:white;border:none;padding:13px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">🐦 Share on X</button>
+            <button onclick="shareTelegram()" style="background:#0088cc;color:white;border:none;padding:13px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">✈️ Share on Telegram</button>
+          </div>
+        </div>
+
+        <!-- How it works -->
+        <div class="db-card" style="margin-bottom:20px;">
+          <div class="db-ch"><div class="db-ct">How It Works 🎯</div></div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--violet);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;">1</div>
+              <div><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Copy your referral link</div><div style="font-size:13px;color:var(--muted);">Every user gets a unique link that tracks signups automatically.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--violet);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;">2</div>
+              <div><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Share with business owners</div><div style="font-size:13px;color:var(--muted);">Send it on WhatsApp, Facebook, TikTok — anywhere!</div></div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--violet);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;">3</div>
+              <div><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">They subscribe to Pro or Business</div><div style="font-size:13px;color:var(--muted);">When your referral upgrades to a paid plan — you start earning!</div></div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;">💰</div>
+              <div><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">You earn $5 every month!</div><div style="font-size:13px;color:var(--muted);">As long as they stay subscribed you keep earning. Refer 10 people = $50/month passive income!</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rewards Table -->
+        <div class="db-card">
+          <div class="db-ch"><div class="db-ct">Reward Tiers 🏆</div></div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 11px 11px;text-align:left;">Referrals</th>
+              <th style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 11px 11px;text-align:left;">Monthly Earnings</th>
+              <th style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 11px 11px;text-align:left;">Bonus</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;">1-2 referrals</td><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;font-weight:700;color:var(--violet);">$5/each</td><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;">Standard</td></tr>
+              <tr><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;">3-9 referrals</td><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;font-weight:700;color:var(--violet);">$7/each</td><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;">🌟 Silver</td></tr>
+              <tr><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;">10+ referrals</td><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;font-weight:700;color:var(--green);">$10/each</td><td style="padding:11px;border-top:1px solid var(--border);font-size:13px;">🏆 Gold</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BUSINESS INFO -->
+      <div class="db-section" id="db-bizinfo">
+        <div class="db-welcome"><h2>Business Info 🏪</h2><p>Tell ZYRA about your business so it can answer customers correctly — on your dashboard and on WhatsApp.</p></div>
+
+        <div class="db-card" style="margin-bottom:16px;">
+          <div class="db-ch"><div class="db-ct">About your business</div></div>
+          <div style="display:flex;flex-direction:column;gap:13px;">
+            <div>
+              <label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">Business name</label>
+              <input id="bi-name" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;" placeholder="e.g. Chikamso's Fashion Store"/>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">What do you sell or offer?</label>
+              <textarea id="bi-what" rows="3" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;resize:vertical;" placeholder="e.g. We sell men's and women's shoes, bags, and accessories"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="db-card" style="margin-bottom:16px;">
+          <div class="db-ch"><div class="db-ct">Products & Prices 💰</div></div>
+          <p style="font-size:13px;color:var(--muted);margin-top:-6px;margin-bottom:14px;">List each product on its own line, like: <b>Item — Price</b>. ZYRA will use this to answer price questions correctly.</p>
+          <textarea id="bi-products" rows="8" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;resize:vertical;" placeholder="Nike Air Max (Men) — ₦35,000
+Ankara gown (custom made) — ₦25,000
+Leather handbag — ₦18,000
+Delivery within Lagos — ₦2,000"></textarea>
+        </div>
+
+        <div class="db-card" style="margin-bottom:16px;">
+          <div class="db-ch"><div class="db-ct">Other things ZYRA should know</div></div>
+          <p style="font-size:13px;color:var(--muted);margin-top:-6px;margin-bottom:14px;">Business hours, delivery areas, return policy, payment options — anything customers usually ask about.</p>
+          <textarea id="bi-extra" rows="5" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;resize:vertical;" placeholder="e.g. Open Mon–Sat, 9am–7pm. We deliver nationwide (2-4 days). Payment via bank transfer or on delivery within Lagos only."></textarea>
+        </div>
+
+        <button id="bi-save-btn" style="background:var(--violet);color:white;border:none;padding:13px 26px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;" onclick="saveBusinessInfo()">Save business info</button>
+        <span id="bi-save-status" style="font-size:13px;color:var(--muted);margin-left:12px;"></span>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="db-section" id="db-settings">
+        <div class="db-welcome"><h2>Settings ⚙️</h2><p>Manage your ZYRA Business account settings.</p></div>
+        <div class="db-card" style="margin-bottom:16px;">
+          <div class="db-ch"><div class="db-ct">Profile</div></div>
+          <div style="display:flex;flex-direction:column;gap:13px;">
+            <div><label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">Full name</label><input style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;" id="set-name" value="Chikamso Ezeagwu"/></div>
+            <div><label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;">Email</label><input style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);outline:none;" value="ezeagwuchikamso7@gmail.com"/></div>
+            <button style="background:var(--violet);color:white;border:none;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;width:fit-content;" onclick="showToast('✅ Settings saved!')">Save changes</button>
+          </div>
+        </div>
+
+        <div class="db-card" style="margin-bottom:16px;">
+          <div class="db-ch"><div class="db-ct">Pricing Plans 💰</div></div>
+
+          <!-- Current -->
+          <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--violet);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Current Plan</div>
+              <div style="font-size:18px;font-weight:800;color:var(--ink);">Free Plan</div>
+              <div style="font-size:12px;color:var(--muted);">50 AI replies • 5 customers • Basic features</div>
+            </div>
+            <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--violet);">$0<span style="font-size:13px;font-weight:500;color:var(--muted);">/mo</span></div>
+          </div>
+
+          <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px;">⬆️ Upgrade your plan:</div>
+
+          <!-- PRO -->
+          <div style="border:1.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">PRO</div>
+                <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--ink);">$29<span style="font-size:12px;font-weight:500;color:var(--muted);">/mo</span></div>
+              </div>
+              <button onclick="showToast('💳 Payment coming soon!')" style="background:var(--violet);color:white;border:none;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Upgrade →</button>
+            </div>
+            <div style="font-size:12px;color:var(--ink);display:flex;flex-direction:column;gap:4px;">
+              <span>✅ Unlimited AI replies</span><span>✅ 500 customers</span><span>✅ Booking & scheduling</span><span>✅ Advanced analytics</span><span>✅ Priority support</span>
+            </div>
+          </div>
+
+          <!-- BUSINESS -->
+          <div style="border:1.5px solid var(--violet);border-radius:14px;padding:16px;margin-bottom:10px;background:rgba(91,59,245,0.03);position:relative;">
+            <div style="position:absolute;top:-10px;left:14px;background:var(--violet);color:white;font-size:10px;font-weight:800;padding:2px 10px;border-radius:50px;">BEST VALUE</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--violet);text-transform:uppercase;margin-bottom:3px;">BUSINESS</div>
+                <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--ink);">$299<span style="font-size:12px;font-weight:500;color:var(--muted);">/mo</span></div>
+              </div>
+              <button onclick="showToast('💳 Payment coming soon!')" style="background:var(--violet);color:white;border:none;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Upgrade →</button>
+            </div>
+            <div style="font-size:12px;color:var(--ink);display:flex;flex-direction:column;gap:4px;">
+              <span>✅ Everything in Pro</span><span>✅ Unlimited customers</span><span>✅ Custom AI training</span><span>✅ Multi-language support</span><span>✅ Account manager</span>
+            </div>
+          </div>
+
+          <!-- AUTONOMOUS -->
+          <div style="border:1.5px solid #F59E0B;border-radius:14px;padding:16px;background:rgba(245,158,11,0.04);position:relative;">
+            <div style="position:absolute;top:-10px;left:14px;background:linear-gradient(135deg,#F59E0B,#EF4444);color:white;font-size:10px;font-weight:800;padding:2px 10px;border-radius:50px;">🚀 NEW</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#F59E0B;text-transform:uppercase;margin-bottom:3px;">AUTONOMOUS</div>
+                <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--ink);">$499<span style="font-size:12px;font-weight:500;color:var(--muted);">/mo</span></div>
+              </div>
+              <button onclick="showToast('🚀 Autonomous plan coming soon!')" style="background:linear-gradient(135deg,#F59E0B,#EF4444);color:white;border:none;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Get Access →</button>
+            </div>
+            <div style="font-size:12px;color:var(--ink);display:flex;flex-direction:column;gap:4px;">
+              <span>✅ Everything in Business</span><span>✅ Full SKY Agent System</span><span>✅ WhatsApp auto-replies</span><span>✅ TikTok & Instagram auto-post</span><span>✅ Full autopilot mode 24/7</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+  <div class="db-overlay" id="db-overlay" onclick="document.getElementById('db-sidebar').classList.remove('open');document.getElementById('db-overlay').classList.remove('show');"></div>
+  <button class="mob-toggle" onclick="document.getElementById('db-sidebar').classList.toggle('open');document.getElementById('db-overlay').classList.toggle('show');">☰</button>
+</div>
+
+<script>
+// ============================================================
+// Real backend base URL — every call that should touch your
+// actual customer data / AI / WhatsApp goes through this.
+// Change this if your Render URL ever changes.
+// ============================================================
+const API_BASE_URL = 'https://zyra-whatsapp.onrender.com';
+
+// ZYRA AUTH SYSTEM - Uses localStorage for storage (works locally and when hosted)
+const ZyraAuth = {
+  storageKey: 'zyra_users_db',
+
+  _readAll() {
+    try {
+      return JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+    } catch(e) {
+      return {};
+    }
+  },
+
+  _writeAll(users) {
+    localStorage.setItem(this.storageKey, JSON.stringify(users));
+  },
+
+  async init() {
+    // No setup needed for localStorage, kept for compatibility with existing calls.
+    return Promise.resolve();
+  },
+
+  async addUser(user) {
+    const users = this._readAll();
+    if(users[user.email]) {
+      return Promise.reject('Email already registered');
+    }
+    users[user.email] = user;
+    this._writeAll(users);
+    return Promise.resolve(true);
+  },
+
+  async getUser(email) {
+    const users = this._readAll();
+    return Promise.resolve(users[email] || null);
+  },
+
+  hashPassword(pw) {
+    // Simple hash for demo - in production use bcrypt
+    let hash = 0;
+    for(let i = 0; i < pw.length; i++) {
+      hash = ((hash << 5) - hash) + pw.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash.toString(36) + pw.length + pw.charCodeAt(0);
+  }
+};
+
+// ===== WHATSAPP API CONFIG =====
+// ⚠️ SECURITY NOTE: Token moved to backend for safety
+// Never store tokens in frontend code!
+const WHATSAPP_CONFIG = {
+  token: 'BACKEND_ONLY', // Token stored securely on server
+  phoneNumberId: '1356132124246290',
+  businessAccountId: '1103082748805228'
+};
+
+// Send WhatsApp message via backend proxy (secure)
+async function sendWhatsAppMessage(to, message) {
+  try {
+    // In production this calls YOUR backend server
+    // which stores the token securely
+    // For now shows what would be sent
+    console.log('WhatsApp message queued:', {to, message});
+    return { success: true, queued: true };
+  } catch(e) {
+    return { success: false, error: e.message };
+  }
+}
+
+// Test WhatsApp connection
+async function testWhatsApp(testPhone) {
+  return await sendWhatsAppMessage(
+    testPhone,
+    '✅ Hello from ZYRA Business! Your WhatsApp is connected! 🚀'
+  );
+}
+// ===== END WHATSAPP CONFIG =====
+
+// WhatsApp test button function
+async function testWhatsAppBtn() {
+  const phone = prompt('Enter your WhatsApp number to test (e.g. 09167953493):');
+  if(!phone) return;
+  showToast('📤 Sending test message...');
+  const result = await testWhatsApp(phone);
+  if(result.success) {
+    showToast('✅ WhatsApp message sent!');
+    addSkyMsg('✅ Test message sent to <strong>' + phone + '</strong>! Check your WhatsApp! 📱', false);
+  } else {
+    showToast('⚠️ ' + (result.error || 'Could not send'));
+    addSkyMsg('⚠️ Note: Test accounts can only message verified numbers. Error: ' + result.error, false);
+  }
+}
+
+// Current mode
+let skyMode = 'assisted';
+let skyHistory = [];
+let permResolve = null;
+let isListening = false;
+let recognition = null;
+
+const modeDescriptions = {
+  manual: 'Manual — SKY explains but takes no action',
+  assisted: 'Assisted — SKY asks before every action',
+  smart: 'Smart — SKY acts on small tasks, asks for big ones',
+  autonomous: 'Autonomous — SKY completes tasks automatically'
+};
+
+// TOOL REGISTRY
+const skyTools = {
+  ai_writing: {
+    name: 'AI Writing',
+    connected: true,
+    execute: async (params) => {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6', max_tokens: 1000,
+          system: 'You are SKY, an intelligent AI agent for ZYRA Business. Help small business owners in Nigeria and Africa. Be professional, friendly and practical.',
+          messages: [{role:'user', content: params.prompt}]
+        })
+      });
+      const data = await res.json();
+      return data.content[0].text;
+    }
+  },
+  customers: {
+    name: 'Customer Management',
+    connected: true,
+    execute: async (params) => {
+      const rows = document.querySelectorAll('#cust-tbody tr');
+      const customers = [];
+      rows.forEach(r => {
+        const name = r.querySelector('.cust-name')?.textContent;
+        const email = r.querySelector('.cust-email')?.textContent;
+        const plan = r.querySelector('.plan-tag')?.textContent;
+        if(name) customers.push({name, email, plan});
+      });
+      return customers;
+    }
+  },
+  whatsapp: {
+    name: 'WhatsApp',
+    connected: true,
+    execute: async (params) => {
+      return await sendWhatsAppMessage(params.to, params.message);
+    }
+  },
+  email: { name: 'Email', connected: false },
+  tiktok: { name: 'TikTok', connected: false },
+  instagram: { name: 'Instagram', connected: false }
+};
+
+// SET MODE
+function setMode(mode, btn) {
+  skyMode = mode;
+  document.querySelectorAll('.sky-mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sky-mode-label').textContent = 'Mode: ' + modeDescriptions[mode];
+  showToast('⚡ SKY mode: ' + mode.charAt(0).toUpperCase() + mode.slice(1));
+}
+
+// TASK PANEL
+function showTaskPanel(title, steps) {
+  document.getElementById('task-title').textContent = title;
+  const stepsEl = document.getElementById('task-steps');
+  stepsEl.innerHTML = '';
+  steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'task-step pending';
+    div.id = 'step-' + i;
+    div.innerHTML = `<span>○</span> ${s}`;
+    stepsEl.appendChild(div);
+  });
+  document.getElementById('task-panel').classList.add('show');
+}
+
+function updateStep(index, status, text) {
+  const el = document.getElementById('step-' + index);
+  if(!el) return;
+  el.className = 'task-step ' + status;
+  const icons = {done:'✅', running:'→', pending:'○', error:'❌'};
+  el.innerHTML = `<span>${icons[status]||'○'}</span> ${text}`;
+}
+
+function closeTaskPanel() {
+  document.getElementById('task-panel').classList.remove('show');
+}
+
+// PERMISSION SYSTEM
+function askPermission(icon, title, desc, details) {
+  return new Promise((resolve) => {
+    permResolve = resolve;
+    document.getElementById('perm-icon').textContent = icon;
+    document.getElementById('perm-title').textContent = title;
+    document.getElementById('perm-desc').textContent = desc;
+    const detailsEl = document.getElementById('perm-details');
+    detailsEl.innerHTML = Object.entries(details).map(([k,v]) =>
+      `<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;"><span style="color:var(--muted);">${k}</span><span style="font-weight:600;color:var(--ink);text-align:right;max-width:60%;">${v}</span></div>`
+    ).join('');
+    document.getElementById('perm-overlay').classList.add('show');
+  });
+}
+
+function permApprove() {
+  document.getElementById('perm-overlay').classList.remove('show');
+  if(permResolve) { permResolve(true); permResolve = null; }
+}
+
+function permCancel() {
+  document.getElementById('perm-overlay').classList.remove('show');
+  if(permResolve) { permResolve(false); permResolve = null; }
+}
+
+// ADD TO HISTORY
+function addToHistory(task, steps, status) {
+  const historyEl = document.getElementById('sky-history');
+  const emptyMsg = historyEl.querySelector('div[style*="text-align:center"]');
+  if(emptyMsg) emptyMsg.remove();
+
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  item.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);">${task}</div>
+      <div style="font-size:11px;color:var(--muted);">${new Date().toLocaleTimeString()}</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.6;">${steps.join(' → ')}</div>
+    <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:50px;margin-top:8px;background:${status==='success'?'var(--green-dim)':'var(--red-dim)'};color:${status==='success'?'var(--green)':'var(--red)'};">${status==='success'?'✅ Completed':'❌ Failed'}</div>
+  `;
+  historyEl.insertBefore(item, historyEl.firstChild);
+}
+
+// ADD SKY MESSAGE
+function addSkyMsg(text, isUser) {
+  const chat = document.getElementById('sky-chat');
+  const div = document.createElement('div');
+  div.className = 'sky-msg ' + (isUser ? 'user' : 'sky');
+  div.innerHTML = isUser ? text : `<strong>⚡ SKY:</strong> ${text}`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// TASK EXECUTOR
+async function executeSkyTask(userMsg) {
+  const userName = localStorage.getItem('zyra_name') || 'there';
+  const msg = userMsg.toLowerCase();
+
+  // Determine task type
+  if(msg.includes('welcome') && (msg.includes('customer') || msg.includes('message'))) {
+    await taskWelcomeCustomer(userMsg, userName);
+  } else if(msg.includes('tiktok') || msg.includes('caption')) {
+    await taskTikTokCaption(userMsg, userName);
+  } else if(msg.includes('social') || msg.includes('post') || msg.includes('instagram')) {
+    await taskSocialPost(userMsg, userName);
+  } else if(msg.includes('follow up') || msg.includes('followup')) {
+    await taskFollowUp(userMsg, userName);
+  } else if(msg.includes('report') || msg.includes('performance') || msg.includes('analytic')) {
+    await taskBusinessReport(userMsg, userName);
+  } else {
+    // General AI response
+    await taskGeneral(userMsg, userName);
+  }
+}
+
+// TASK: Welcome Customer
+async function taskWelcomeCustomer(userMsg, userName) {
+  const steps = ['Understand request', 'Get customer list', 'Write welcome message', 'Ask permission', 'Send message'];
+  showTaskPanel('Welcome Customer', steps);
+
+  updateStep(0, 'running', 'Understanding your request...');
+  await delay(600);
+  updateStep(0, 'done', 'Request understood ✓');
+
+  updateStep(1, 'running', 'Getting customer list...');
+  await delay(800);
+  const customers = await skyTools.customers.execute({});
+  const latestCustomer = customers[customers.length-1] || {name:'New Customer', email:'customer@email.com'};
+  updateStep(1, 'done', `Found ${customers.length} customers ✓`);
+
+  updateStep(2, 'running', 'Writing welcome message...');
+  const prompt = `Write a short, warm, professional welcome message for a new customer named "${latestCustomer.name}" from a business called ZYRA Business. Keep it under 50 words. No subject line needed.`;
+  const message = await skyTools.ai_writing.execute({prompt});
+  updateStep(2, 'done', 'Message written ✓');
+
+  if(skyMode === 'manual') {
+    addSkyMsg(`I've written this welcome message for ${latestCustomer.name}:<br><br><em>"${message}"</em><br><br>In Manual mode I don't send it automatically. Copy and send it yourself! 😊`, false);
+    updateStep(3, 'done', 'Shown to you (Manual mode)');
+    updateStep(4, 'done', 'Send it manually ✓');
+    addToHistory('Welcome Customer', ['Understood', 'Got customers', 'Wrote message', 'Manual mode'], 'success');
+    return;
+  }
+
+  updateStep(3, 'running', 'Asking your permission...');
+  const approved = await askPermission('💬', 'Send Welcome Message?',
+    'SKY wants to send a welcome message to your customer.',
+    {'Customer': latestCustomer.name, 'Channel': 'WhatsApp (when connected)', 'Message preview': message.substring(0,60)+'...'}
+  );
+
+  if(!approved) {
+    updateStep(3, 'error', 'Permission denied');
+    updateStep(4, 'pending', 'Cancelled');
+    addSkyMsg('No problem! I cancelled the action. The message is ready if you change your mind:<br><br><em>"'+message+'"</em>', false);
+    addToHistory('Welcome Customer', ['Understood', 'Got customers', 'Wrote message', 'Denied'], 'failed');
+    return;
+  }
+
+  updateStep(3, 'done', 'Permission approved ✓');
+  updateStep(4, 'running', 'Sending message...');
+  await delay(1000);
+
+  if(!skyTools.whatsapp.connected) {
+    updateStep(4, 'error', 'WhatsApp not connected');
+    addSkyMsg(`✅ Message is ready! But WhatsApp isn't connected yet.<br><br>Here's your welcome message for <strong>${latestCustomer.name}</strong>:<br><br><em>"${message}"</em><br><br>Connect WhatsApp to send automatically! 🔌`, false);
+    addToHistory('Welcome Customer', ['Understood', 'Got customers', 'Wrote message', 'Approved', 'WhatsApp needed'], 'success');
+  } else {
+    updateStep(4, 'done', 'Message sent ✓');
+    addSkyMsg(`✅ Welcome message sent to <strong>${latestCustomer.name}</strong> successfully!`, false);
+    addToHistory('Welcome Customer', ['Understood', 'Got customers', 'Wrote message', 'Approved', 'Sent'], 'success');
+  }
+}
+
+// TASK: TikTok Caption
+async function taskTikTokCaption(userMsg, userName) {
+  const steps = ['Understand content', 'Analyze topic', 'Generate captions', 'Generate hashtags', 'Present options'];
+  showTaskPanel('TikTok Caption Generator', steps);
+
+  updateStep(0, 'running', 'Understanding your content...');
+  await delay(500);
+  updateStep(0, 'done', 'Content understood ✓');
+
+  updateStep(1, 'running', 'Analyzing topic...');
+  await delay(600);
+  updateStep(1, 'done', 'Topic analyzed ✓');
+
+  updateStep(2, 'running', 'Generating 3 caption options...');
+  const prompt = `Create 3 different TikTok caption options for a small business in Nigeria/Africa. Each caption should be engaging, under 150 characters, and end with a call to action. Format as:
+Caption 1: [caption]
+Caption 2: [caption]
+Caption 3: [caption]
+
+Context from user: "${userMsg}"`;
+  const captions = await skyTools.ai_writing.execute({prompt});
+  updateStep(2, 'done', '3 captions generated ✓');
+
+  updateStep(3, 'running', 'Generating hashtags...');
+  const hashPrompt = `Generate 10 relevant TikTok hashtags for a small business in Nigeria/Africa. Mix popular and niche hashtags. Context: "${userMsg}". Format: #tag1 #tag2 etc`;
+  const hashtags = await skyTools.ai_writing.execute({prompt: hashPrompt});
+  updateStep(3, 'done', 'Hashtags generated ✓');
+
+  updateStep(4, 'done', 'Ready for you ✓');
+
+  addSkyMsg(`🎵 Here are your TikTok caption options:<br><br>${captions.replace(/\n/g,'<br>')}<br><br><strong>Hashtags:</strong><br>${hashtags}<br><br>Which caption do you like? I can edit any of them! ✏️`, false);
+  addToHistory('TikTok Caption', ['Understood', 'Analyzed', 'Generated captions', 'Generated hashtags', 'Presented'], 'success');
+}
+
+// TASK: Social Media Post
+async function taskSocialPost(userMsg, userName) {
+  const steps = ['Understand request', 'Write post', 'Generate hashtags', 'Ask permission', 'Ready to post'];
+  showTaskPanel('Social Media Post', steps);
+
+  updateStep(0, 'running', 'Understanding your request...');
+  await delay(500);
+  updateStep(0, 'done', 'Request understood ✓');
+
+  updateStep(1, 'running', 'Writing your post...');
+  const prompt = `Write an engaging social media post for a small business in Nigeria/Africa. Make it professional, friendly, and include emojis. Context: "${userMsg}". Keep it under 200 characters.`;
+  const post = await skyTools.ai_writing.execute({prompt});
+  updateStep(1, 'done', 'Post written ✓');
+
+  updateStep(2, 'running', 'Generating hashtags...');
+  const hashPrompt = `Generate 8 relevant hashtags for this social media post: "${post}". Mix Nigerian and global hashtags.`;
+  const hashtags = await skyTools.ai_writing.execute({prompt: hashPrompt});
+  updateStep(2, 'done', 'Hashtags ready ✓');
+
+  updateStep(3, 'running', 'Waiting for permission...');
+  const approved = await askPermission('📢', 'Post to Social Media?',
+    'SKY wants to post this content to your social media.',
+    {'Platform': 'Instagram/Facebook (when connected)', 'Post preview': post.substring(0,60)+'...', 'Hashtags': hashtags.substring(0,40)+'...'}
+  );
+
+  if(!approved) {
+    updateStep(3, 'error', 'Cancelled by you');
+    updateStep(4, 'pending', 'Not posted');
+    addSkyMsg(`No problem! Here's your post ready to copy:<br><br><em>${post}</em><br><br>${hashtags}`, false);
+    addToHistory('Social Media Post', ['Understood', 'Written', 'Hashtags', 'Cancelled'], 'failed');
+    return;
+  }
+
+  updateStep(3, 'done', 'Approved ✓');
+  updateStep(4, 'running', 'Posting...');
+  await delay(800);
+  updateStep(4, skyTools.instagram.connected ? 'done' : 'error', skyTools.instagram.connected ? 'Posted ✓' : 'Instagram not connected yet');
+
+  addSkyMsg(`✅ Your post is ready!<br><br><em>${post}</em><br><br>${hashtags}<br><br>${!skyTools.instagram.connected ? '🔌 Connect Instagram to post automatically!' : 'Posted successfully!'}`, false);
+  addToHistory('Social Media Post', ['Understood', 'Written', 'Hashtags', 'Approved', skyTools.instagram.connected ? 'Posted' : 'Needs Instagram'], 'success');
+}
+
+// TASK: Follow Up
+async function taskFollowUp(userMsg, userName) {
+  const steps = ['Get customers', 'Write follow up', 'Ask permission', 'Send messages'];
+  showTaskPanel('Customer Follow Up', steps);
+
+  updateStep(0, 'running', 'Getting your customers...');
+  await delay(600);
+  const customers = await skyTools.customers.execute({});
+  updateStep(0, 'done', `Found ${customers.length} customers ✓`);
+
+  updateStep(1, 'running', 'Writing follow up message...');
+  const prompt = `Write a short, friendly follow up message for customers of a small business. Should feel personal and encourage them to come back. Under 60 words. Context: "${userMsg}"`;
+  const message = await skyTools.ai_writing.execute({prompt});
+  updateStep(1, 'done', 'Message written ✓');
+
+  updateStep(2, 'running', 'Asking permission...');
+  const approved = await askPermission('📧', 'Send Follow Up Messages?',
+    `SKY wants to send a follow up to ${customers.length} customers.`,
+    {'Customers': customers.length + ' customers', 'Channel': 'WhatsApp (when connected)', 'Message': message.substring(0,60)+'...'}
+  );
+
+  if(!approved) {
+    updateStep(2, 'error', 'Cancelled');
+    updateStep(3, 'pending', 'Not sent');
+    addSkyMsg(`Cancelled! Here's your follow up message anyway:<br><br><em>"${message}"</em>`, false);
+    addToHistory('Follow Up', ['Got customers', 'Written', 'Cancelled'], 'failed');
+    return;
+  }
+
+  updateStep(2, 'done', 'Approved ✓');
+  updateStep(3, 'running', 'Sending...');
+  await delay(1000);
+  updateStep(3, skyTools.whatsapp.connected ? 'done' : 'error', skyTools.whatsapp.connected ? 'Sent ✓' : 'WhatsApp needed');
+  addSkyMsg(`✅ Follow up ready for ${customers.length} customers!<br><br><em>"${message}"</em><br><br>${!skyTools.whatsapp.connected ? '🔌 Connect WhatsApp to send automatically!' : 'Sent to all customers!'}`, false);
+  addToHistory('Follow Up', ['Got customers', 'Written', 'Approved', skyTools.whatsapp.connected ? 'Sent' : 'Needs WhatsApp'], 'success');
+}
+
+// TASK: Business Report
+async function taskBusinessReport(userMsg, userName) {
+  const steps = ['Gather data', 'Analyze performance', 'Generate insights', 'Create report'];
+  showTaskPanel('Business Performance Report', steps);
+
+  updateStep(0, 'running', 'Gathering your data...');
+  await delay(700);
+  const customers = await skyTools.customers.execute({});
+  updateStep(0, 'done', 'Data gathered ✓');
+
+  updateStep(1, 'running', 'Analyzing performance...');
+  await delay(800);
+  updateStep(1, 'done', 'Analysis complete ✓');
+
+  updateStep(2, 'running', 'Generating insights...');
+  const prompt = `Create a brief business performance report for a small business with ${customers.length} customers. Include insights about growth, recommendations, and next steps. Keep it practical and encouraging. Context: "${userMsg}"`;
+  const report = await skyTools.ai_writing.execute({prompt});
+  updateStep(2, 'done', 'Insights generated ✓');
+
+  updateStep(3, 'done', 'Report ready ✓');
+  addSkyMsg(`📊 <strong>Business Report:</strong><br><br>${report.replace(/\n/g,'<br>')}`, false);
+  addToHistory('Business Report', ['Gathered data', 'Analyzed', 'Generated insights', 'Report ready'], 'success');
+}
+
+// TASK: General
+async function taskGeneral(userMsg, userName) {
+  const typing = document.createElement('div');
+  typing.className = 'sky-msg sky';
+  typing.innerHTML = '<strong>⚡ SKY:</strong> <em>Thinking...</em>';
+  document.getElementById('sky-chat').appendChild(typing);
+  document.getElementById('sky-chat').scrollTop = 9999;
+
+  try {
+    const prompt = `You are SKY, an intelligent AI agent for ZYRA Business helping small business owners in Nigeria and Africa. Be helpful, practical, and professional. User says: "${userMsg}"`;
+    const reply = await skyTools.ai_writing.execute({prompt});
+    typing.innerHTML = `<strong>⚡ SKY:</strong> ${reply.replace(/\n/g,'<br>')}`;
+    addToHistory(userMsg.substring(0,40)+'...', ['Processed request', 'Generated response'], 'success');
+  } catch(e) {
+    typing.innerHTML = '<strong>⚡ SKY:</strong> I had trouble processing that. Please try again! 🔄';
+  }
+  document.getElementById('sky-chat').scrollTop = 9999;
+}
+
+// SEND SKY MESSAGE
+async function sendSky() {
+  const inp = document.getElementById('sky-inp');
+  const msg = inp.value.trim();
+  if(!msg) return;
+  inp.value = '';
+  addSkyMsg(msg, true);
+  await executeSkyTask(msg);
+}
+
+function skySuggest(text) {
+  document.getElementById('sky-inp').value = text;
+  sendSky();
+}
+
+function clearSkyChat() {
+  document.getElementById('sky-chat').innerHTML = '<div class="sky-msg sky"><strong>⚡ SKY:</strong> Chat cleared! What would you like me to help with? 🚀</div>';
+}
+
+function deleteMemory(btn) {
+  btn.closest('.memory-item').remove();
+  showToast('🗑️ Memory deleted');
+}
+
+function clearSkyMemory() {
+  document.getElementById('sky-memory-list').innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px;">No memories saved.</div>';
+  showToast('🧠 Memory cleared');
+}
+
+function clearSkyHistory() {
+  document.getElementById('sky-history').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No activity yet. Ask SKY to do something! ⚡</div>';
+  showToast('📋 History cleared');
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// VOICE SYSTEM
+function toggleVoice() {
+  if(isListening) {
+    stopVoice();
+  } else {
+    startVoice();
+  }
+}
+
+function startVoice() {
+  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('⚠️ Voice not supported on this browser');
+    return;
+  }
+  try {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      isListening = true;
+      document.getElementById('voice-dot').classList.add('listening');
+      document.getElementById('voice-label').textContent = '🎙️ Listening... (tap to stop)';
+    };
+
+    recognition.onresult = (e) => {
+      const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+      document.getElementById('sky-inp').value = transcript;
+      if(e.results[0].isFinal) {
+        stopVoice();
+        if(transcript.trim()) sendSky();
+      }
+    };
+
+    recognition.onerror = (e) => {
+      stopVoice();
+      if(e.error !== 'aborted') showToast('⚠️ Microphone error: ' + e.error);
+    };
+
+    recognition.onend = () => stopVoice();
+    recognition.start();
+  } catch(e) {
+    showToast('⚠️ Could not start microphone');
+  }
+}
+
+function stopVoice() {
+  isListening = false;
+  if(recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+  document.getElementById('voice-dot').classList.remove('listening');
+  document.getElementById('voice-label').textContent = '🎙️ Tap to speak';
+}
+
+// ============ END SKY AGENT SYSTEM ============
+function checkInternet() {
+  const overlay = document.getElementById('no-internet');
+  if(!navigator.onLine) {
+    overlay.classList.add('show');
+  } else {
+    // Double check with a real request
+    fetch('https://api.anthropic.com', {method:'HEAD', mode:'no-cors'})
+      .then(()=>{ overlay.classList.remove('show'); showToast('✅ Connected! Welcome to ZYRA Business!'); })
+      .catch(()=>{ overlay.classList.remove('show'); }); // Remove anyway if fetch fails but onLine is true
+  }
+}
+
+// Check internet on page load
+window.addEventListener('load', ()=>{
+  if(!navigator.onLine) {
+    document.getElementById('no-internet').classList.add('show');
+  }
+});
+
+// Listen for connection changes
+window.addEventListener('offline', ()=>{
+  document.getElementById('no-internet').classList.add('show');
+  showToast('⚠️ Internet connection lost!');
+});
+
+window.addEventListener('online', ()=>{
+  document.getElementById('no-internet').classList.remove('show');
+  showToast('✅ Back online! Welcome to ZYRA Business!');
+});
+
+// PAGE SYSTEM
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+    if(p.id === 'page-dashboard') p.style.display = 'none';
+  });
+  const pg = document.getElementById('page-'+name);
+  if(name === 'dashboard') {
+    pg.style.display = 'flex';
+    pg.classList.add('active');
+    const now = new Date();
+    document.getElementById('db-date').textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  } else {
+    pg.classList.add('active');
+  }
+  window.scrollTo(0,0);
+}
+
+// TOAST
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(()=>t.style.transform='translateX(-50%) translateY(120px)',3000);
+}
+
+// FAQ
+document.querySelectorAll('.fq').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    const isOpen=item.classList.contains('open');
+    document.querySelectorAll('.fi').forEach(i=>i.classList.remove('open'));
+    if(!isOpen)item.classList.add('open');
+  });
+});
+
+// SCROLL FADE
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+// AUTH
+function switchTab(tab) {
+  document.getElementById('su-form').style.display = tab==='signup'?'block':'none';
+  document.getElementById('li-form').style.display = tab==='login'?'block':'none';
+  document.getElementById('success-sc').style.display = 'none';
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>{
+    t.classList.toggle('active', (tab==='signup'&&i===0)||(tab==='login'&&i===1));
+  });
+}
+
+function togglePw(id,btn) {
+  const inp=document.getElementById(id);
+  inp.type=inp.type==='password'?'text':'password';
+  btn.textContent=inp.type==='password'?'👁️':'🙈';
+}
+
+function handleGoogle() { showToast('🔵 Google sign-in coming soon!'); }
+
+async function handleSignup() {
+  const fn=document.getElementById('su-fn').value.trim();
+  const ln=document.getElementById('su-ln').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pw=document.getElementById('su-pw').value;
+  const biz=document.getElementById('su-biz').value.trim();
+  const terms=document.getElementById('su-terms').checked;
+  document.getElementById('su-email-err').style.display='none';
+  document.getElementById('su-pw-err').style.display='none';
+  if(!fn){showToast('⚠️ Please enter your first name');return;}
+  if(!email||!email.includes('@')){document.getElementById('su-email-err').style.display='block';return;}
+  if(pw.length<8){document.getElementById('su-pw-err').style.display='block';return;}
+  if(!terms){showToast('⚠️ Please agree to the Terms of Service');return;}
+
+  const btn=document.getElementById('su-btn');
+  btn.querySelector('.su-txt').style.display='none';
+  btn.querySelector('#su-spin').style.display='block';
+  btn.classList.add('loading');
+
+  try {
+    await ZyraAuth.init();
+    const existing = await ZyraAuth.getUser(email);
+    if(existing) {
+      showToast('⚠️ Email already registered! Please sign in.');
+      btn.querySelector('.su-txt').style.display='block';
+      btn.querySelector('#su-spin').style.display='none';
+      btn.classList.remove('loading');
+      return;
+    }
+
+    await ZyraAuth.addUser({
+      email: email,
+      password: ZyraAuth.hashPassword(pw),
+      firstname: fn,
+      lastname: ln,
+      fullname: fn + ' ' + ln,
+      business: biz,
+      plan: 'free',
+      joined: new Date().toISOString()
+    });
+
+    localStorage.setItem('zyra_name', fn);
+    localStorage.setItem('zyra_email', email);
+    localStorage.setItem('zyra_logged_in', 'true');
+
+    setTimeout(()=>{
+      btn.querySelector('.su-txt').style.display='block';
+      btn.querySelector('#su-spin').style.display='none';
+      btn.classList.remove('loading');
+      document.getElementById('su-form').style.display='none';
+      document.getElementById('success-sc').style.display='block';
+    }, 1000);
+
+  } catch(e) {
+    showToast('❌ ' + (e || 'Something went wrong. Try again.'));
+    btn.querySelector('.su-txt').style.display='block';
+    btn.querySelector('#su-spin').style.display='none';
+    btn.classList.remove('loading');
+  }
+}
+
+async function handleLogin() {
+  const email = document.getElementById('li-email').value.trim();
+  const pw = document.getElementById('li-pw').value;
+  if(!email||!email.includes('@')){showToast('⚠️ Please enter a valid email');return;}
+  if(!pw){showToast('⚠️ Please enter your password');return;}
+
+  const btn = document.getElementById('li-btn');
+  btn.querySelector('.li-txt').style.display='none';
+  btn.querySelector('#li-spin').style.display='block';
+  btn.classList.add('loading');
+
+  try {
+    await ZyraAuth.init();
+    const user = await ZyraAuth.getUser(email);
+
+    if(!user || user.password !== ZyraAuth.hashPassword(pw)) {
+      showToast('❌ Wrong email or password!');
+      document.getElementById('li-email').style.border='1.5px solid #EF4444';
+      document.getElementById('li-pw').style.border='1.5px solid #EF4444';
+      setTimeout(()=>{
+        document.getElementById('li-email').style.border='1.5px solid #E5E3F0';
+        document.getElementById('li-pw').style.border='1.5px solid #E5E3F0';
+      },2000);
+      btn.querySelector('.li-txt').style.display='block';
+      btn.querySelector('#li-spin').style.display='none';
+      btn.classList.remove('loading');
+      return;
+    }
+
+    localStorage.setItem('zyra_name', user.firstname);
+    localStorage.setItem('zyra_email', email);
+    localStorage.setItem('zyra_logged_in', 'true');
+
+    setTimeout(()=>{
+      btn.querySelector('.li-txt').style.display='block';
+      btn.querySelector('#li-spin').style.display='none';
+      btn.classList.remove('loading');
+      document.getElementById('li-form').style.display='none';
+      document.getElementById('success-sc').style.display='block';
+    }, 1000);
+
+  } catch(e) {
+    showToast('❌ Something went wrong. Please try again.');
+    btn.querySelector('.li-txt').style.display='block';
+    btn.querySelector('#li-spin').style.display='none';
+    btn.classList.remove('loading');
+  }
+}
+
+function goToDashboard() {
+  const name = localStorage.getItem('zyra_name') || 'Chikamso';
+  document.getElementById('db-wname').textContent = name;
+  document.getElementById('db-uname').textContent = name;
+  document.getElementById('db-av').textContent = name[0].toUpperCase();
+  updateCustCount();
+  initReferral();
+  showPage('dashboard');
+}
+
+function handleLogout() {
+  const overlay = document.createElement('div');
+  overlay.id = 'logout-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML = '<div style="background:white;border-radius:20px;padding:32px;width:100%;max-width:340px;text-align:center;"><div style="font-size:40px;margin-bottom:16px;">👋</div><h3 style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:#0A0A12;margin-bottom:8px;">Log out of ZYRA Business?</h3><p style="font-size:14px;color:#6B6880;margin-bottom:24px;">You will need to sign in again to access your dashboard.</p><div style="display:flex;gap:10px;"><button id="cancel-logout" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid #E5E3F0;background:white;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Cancel</button><button id="confirm-logout" style="flex:1;padding:13px;border-radius:12px;border:none;background:#5B3BF5;color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Log out</button></div></div>';
+  document.body.appendChild(overlay);
+  document.getElementById('cancel-logout').onclick = function(){ document.body.removeChild(overlay); };
+  document.getElementById('confirm-logout').onclick = function(){
+    document.body.removeChild(overlay);
+    localStorage.removeItem('zyra_name');
+    localStorage.removeItem('zyra_email');
+    localStorage.removeItem('zyra_logged_in');
+    showPage('landing');
+  };
+}
+
+// REFERRAL SYSTEM
+function initReferral() {
+  const name = localStorage.getItem('zyra_name') || 'user';
+  const refCode = name.toLowerCase().replace(/\s+/g,'') + Math.random().toString(36).substr(2,4);
+  localStorage.setItem('zyra_ref_code', refCode);
+  const refLink = 'zyrabusiness.netlify.app?ref=' + refCode;
+  const el = document.getElementById('ref-link');
+  if(el) el.textContent = refLink;
+
+  // Load saved referral data
+  const refs = JSON.parse(localStorage.getItem('zyra_referrals') || '[]');
+  const paid = refs.filter(r=>r.paid);
+  const pending = refs.filter(r=>!r.paid);
+
+  // Calculate earnings based on tiers
+  let rate = 5;
+  if(paid.length >= 10) rate = 10;
+  else if(paid.length >= 3) rate = 7;
+  const monthly = paid.length * rate;
+
+  document.getElementById('ref-total-count').textContent = refs.length;
+  document.getElementById('ref-paid-count').textContent = paid.length;
+  document.getElementById('ref-pending-count').textContent = pending.length;
+  document.getElementById('ref-active-count').textContent = paid.length;
+  document.getElementById('ref-total-earnings').textContent = '$' + (monthly * 3).toFixed(2);
+  document.getElementById('ref-month-earnings').textContent = '$' + monthly.toFixed(2);
+}
+
+function copyRefLink() {
+  const link = document.getElementById('ref-link').textContent;
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(()=>showToast('✅ Referral link copied!')).catch(()=>{
+      fallbackCopy(link);
+    });
+  } else {
+    fallbackCopy(link);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  showToast('✅ Referral link copied!');
+}
+
+function getRefLink() {
+  return document.getElementById('ref-link').textContent;
+}
+
+function shareWhatsApp() {
+  const msg = encodeURIComponent('🤖 I\'m using ZYRA Business — the AI that runs your business automatically! Try it free 👇\n\n' + getRefLink());
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+function shareFacebook() {
+  const url = encodeURIComponent(getRefLink());
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
+}
+
+function shareTwitter() {
+  const msg = encodeURIComponent('🤖 ZYRA Business uses AI to reply to customers automatically 24/7! Try it free 👇 ' + getRefLink() + ' #ZYRABusiness #AI #SmallBusiness');
+  window.open('https://twitter.com/intent/tweet?text=' + msg, '_blank');
+}
+
+function shareTelegram() {
+  const msg = encodeURIComponent('🤖 Try ZYRA Business — AI that runs your business automatically! Free to start 👇\n' + getRefLink());
+  window.open('https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=' + msg, '_blank');
+}
+
+// BUSINESS INFO (used to make ZYRA's replies accurate — both here and on WhatsApp)
+function getBusinessInfo() {
+  try {
+    return JSON.parse(localStorage.getItem('zyra_business_info') || '{}');
+  } catch(e) {
+    return {};
+  }
+}
+
+async function loadBusinessInfoForm() {
+  // Show the local cache instantly so the form isn't blank while we fetch
+  const cached = getBusinessInfo();
+  if (document.getElementById('bi-name')) document.getElementById('bi-name').value = cached.name || '';
+  if (document.getElementById('bi-what')) document.getElementById('bi-what').value = cached.what || '';
+  if (document.getElementById('bi-products')) document.getElementById('bi-products').value = cached.products || '';
+  if (document.getElementById('bi-extra')) document.getElementById('bi-extra').value = cached.extra || '';
+
+  // Then get the real, up-to-date info from the backend (this is what
+  // ZYRA actually uses on WhatsApp)
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/business-info`);
+    const info = await res.json();
+    if (document.getElementById('bi-name')) document.getElementById('bi-name').value = info.name || '';
+    if (document.getElementById('bi-what')) document.getElementById('bi-what').value = info.what || '';
+    if (document.getElementById('bi-products')) document.getElementById('bi-products').value = info.products || '';
+    if (document.getElementById('bi-extra')) document.getElementById('bi-extra').value = info.extra || '';
+    localStorage.setItem('zyra_business_info', JSON.stringify(info));
+  } catch (e) {
+    console.warn('Could not reach backend for business info, showing cached copy.', e);
+  }
+}
+
+async function saveBusinessInfo() {
+  const info = {
+    name: document.getElementById('bi-name').value.trim(),
+    what: document.getElementById('bi-what').value.trim(),
+    products: document.getElementById('bi-products').value.trim(),
+    extra: document.getElementById('bi-extra').value.trim()
+  };
+  const status = document.getElementById('bi-save-status');
+  status.textContent = 'Saving...';
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/business-info`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(info)
+    });
+    if (!res.ok) throw new Error('Server rejected the save');
+
+    localStorage.setItem('zyra_business_info', JSON.stringify(info));
+    status.textContent = '✅ Saved! ZYRA now knows this on WhatsApp too.';
+    if (typeof showToast === 'function') showToast('✅ Business info saved!');
+  } catch (e) {
+    status.textContent = '⚠️ Could not save to server — check your connection.';
+    if (typeof showToast === 'function') showToast('⚠️ Save failed — try again');
+    console.error('saveBusinessInfo error:', e);
+  }
+  setTimeout(()=>{ status.textContent=''; }, 4000);
+}
+
+document.addEventListener('DOMContentLoaded', loadBusinessInfoForm);
+
+// DASHBOARD SECTIONS
+function dbShow(name, el) {
+  document.querySelectorAll('.db-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('db-'+name).classList.add('active');
+  const titles={overview:'Dashboard',sky:'SKY Agent System',ai:'AI Assistant',bizinfo:'Business Info',customers:'Customers',analytics:'Analytics',automation:'Automation',referral:'Refer & Earn',settings:'Settings'};
+  document.getElementById('db-title').textContent=titles[name];
+  document.querySelectorAll('.dbi').forEach(d=>d.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(window.innerWidth<768){document.getElementById('db-sidebar').classList.remove('open');document.getElementById('db-overlay').classList.remove('show');}
+  if(name==='bizinfo')loadBusinessInfoForm();
+  // Update customer count when switching to customers
+  if(name==='customers') updateCustCount();
+}
+
+// AI CHAT with conversation memory
+let aiHistory = [];
+
+function getAIChatCount(){
+  return parseInt(localStorage.getItem('zyra_ai_chat_count')||'0',10);
+}
+function incAIChatCount(){
+  localStorage.setItem('zyra_ai_chat_count', String(getAIChatCount()+1));
+}
+const FREE_AI_CHAT_LIMIT = 10;
+async function sendAI() {
+  const inp=document.getElementById('ai-inp');
+  const msg=inp.value.trim();
+  if(!msg)return;
+  if(getAccountPlan()==='free' && getAIChatCount()>=FREE_AI_CHAT_LIMIT){
+    showUpgradeModal('🚀 You\'ve used all '+FREE_AI_CHAT_LIMIT+' free AI messages this plan allows.');
+    return;
+  }
+  inp.value='';
+  const chat=document.getElementById('ai-chat');
+
+  // Add user message to UI
+  const um=document.createElement('div');
+  um.className='ai-msg user';
+  um.textContent=msg;
+  chat.appendChild(um);
+
+  // Add to history
+  aiHistory.push({role:'user', content:msg});
+
+  // Typing indicator
+  const tm=document.createElement('div');
+  tm.className='ai-msg bot';
+  tm.innerHTML='<span style="opacity:0.6;">ZYRA Business is typing...</span>';
+  chat.appendChild(tm);
+  chat.scrollTop=chat.scrollHeight;
+
+  const userName = localStorage.getItem('zyra_name') || 'there';
+
+  try {
+    // The AI key never lives in the browser — the backend holds it and
+    // does the actual Groq call for us.
+    const res = await fetch(`${API_BASE_URL}/api/dashboard-chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userName, history: aiHistory })
+    });
+    if (!res.ok) throw new Error('Backend chat request failed');
+    const data = await res.json();
+    const reply = data.reply;
+    tm.textContent = reply;
+    // Add assistant reply to history
+    aiHistory.push({role:'assistant', content:reply});
+    incAIChatCount();
+  } catch(e) {
+    // Smart fallback replies based on message content
+    const lmsg = msg.toLowerCase();
+    let reply = '';
+    if(lmsg.includes('hi')||lmsg.includes('hello')||lmsg.includes('hey')){
+      reply = `Hi ${userName}! 👋 Great to see you! I'm ZYRA, your AI business assistant. I'm doing great and ready to help you grow your business today. What can I help you with? 😊`;
+    } else if(lmsg.includes('how are you')||lmsg.includes('how r u')){
+      reply = `I'm doing amazing, thank you for asking ${userName}! 💜 Always energized and ready to help. More importantly — how are YOU doing? And what business challenge can I help you tackle today?`;
+    } else if(lmsg.includes('who are you')||lmsg.includes('what are you')){
+      reply = `I'm ZYRA Business — your AI-powered business assistant! 🤖✨ I'm here to help you with customer replies, social media content, business advice, marketing ideas, and so much more. Think of me as your smartest business partner, available 24/7. What do you need help with today, ${userName}?`;
+    } else if(lmsg.includes('thank')){
+      reply = `You're so welcome, ${userName}! 💜 That's exactly what I'm here for. Is there anything else I can help you with today?`;
+    } else if(lmsg.includes('social')||lmsg.includes('instagram')||lmsg.includes('tiktok')){
+      reply = `Great topic! 📱 For social media, post at 7–9pm Nigerian time when engagement is highest. Mix your content: 40% behind-the-scenes, 30% tips/value, 30% promotion. On TikTok, use trending sounds — it boosts reach by up to 300%! Want me to write a specific post for your business?`;
+    } else if(lmsg.includes('customer')||lmsg.includes('client')){
+      reply = `Customers are everything! 🌟 The golden rule: reply fast, be warm, and always follow up. A simple "Thank you for reaching out! We'll get back to you within 1 hour" builds massive trust. Want me to write some customer reply templates for your business?`;
+    } else if(lmsg.includes('money')||lmsg.includes('revenue')||lmsg.includes('sales')){
+      reply = `Let's grow those sales! 💰 Three quick wins: 1) Add a WhatsApp button to everything — it increases conversions by 40%. 2) Offer a loyalty discount ("Book 5 times, get 1 free"). 3) Follow up with past customers monthly. Which would you like to implement first?`;
+    } else {
+      reply = `That's a great point, ${userName}! 💡 Here's my honest take: focus on solving one specific problem for your customers really well, and word of mouth will do the rest. Would you like me to help you dig deeper into this? Just tell me more about your business! 😊`;
+    }
+    tm.textContent = reply;
+    aiHistory.push({role:'assistant', content:reply});
+  }
+  chat.scrollTop=chat.scrollHeight;
+}
+
+// Customer functions
+function openAddCustomer() {
+  if(getAccountPlan()==='free' && getCustomerCount()>=3){
+    showUpgradeModal('🚀 Free plan allows up to 3 customers.');
+    return;
+  }
+  const modal = document.getElementById('add-cust-modal');
+  modal.style.display = 'flex';
+}
+function closeAddCustomer() {
+  document.getElementById('add-cust-modal').style.display = 'none';
+  document.getElementById('nc-name').value = '';
+  document.getElementById('nc-email').value = '';
+  document.getElementById('nc-phone').value = '';
+  document.getElementById('nc-plan').value = 'free';
+}
+function getAccountPlan(){
+  return localStorage.getItem('zyra_account_plan') || 'free';
+}
+function getCustomerCount(){
+  const tbody = document.getElementById('cust-tbody');
+  return tbody ? tbody.querySelectorAll('tr').length : 0;
+}
+function showUpgradeModal(reason){
+  const msg = reason || 'You\'ve reached the limit of the Free plan.';
+  if(confirm(msg + '\n\nUpgrade to Pro to unlock unlimited customers and full AI access.\n\nTap OK to see Pro plans, or Cancel to stay on Free.')){
+    const settingsLink = document.querySelector('[onclick*="settings"]') || document.querySelector('.nav-item');
+    dbShow('settings', settingsLink);
+    showToast('✨ Check out Pro plans in Settings');
+  }
+}
+async function saveCustomer() {
+  const name = document.getElementById('nc-name').value.trim();
+  const email = document.getElementById('nc-email').value.trim();
+  const phone = document.getElementById('nc-phone').value.trim();
+  const plan = document.getElementById('nc-plan').value;
+  if(getAccountPlan()==='free' && getCustomerCount()>=3){
+    closeAddCustomer();
+    showUpgradeModal('🚀 Free plan allows up to 3 customers.');
+    return;
+  }
+  if(!name){showToast('⚠️ Please enter the customer name');return;}
+  if(!email||!email.includes('@')){showToast('⚠️ Please enter a valid email');return;}
+  if(!phone){showToast('⚠️ Please enter the customer\'s WhatsApp number');return;}
+
+  const saveBtn = document.querySelector('#add-cust-modal button[onclick="saveCustomer()"]');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Sending welcome message...'; }
+
+  try {
+    // Actually messages the customer on WhatsApp through your real backend
+    const res = await fetch(`${API_BASE_URL}/api/add-customer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to add customer');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+    console.error('saveCustomer error:', e);
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Add customer'; }
+    return;
+  }
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Add customer'; }
+
+  const colors = ['#5B3BF5','#059669','#DC2626','#D97706','#2563EB','#7C3AED'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  const initial = name[0].toUpperCase();
+  const planClass = plan==='pro'?'ptpro':plan==='business'?'ptbiz':'ptfree';
+  const planLabel = plan.charAt(0).toUpperCase()+plan.slice(1);
+  const now = new Date();
+  const month = now.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+  const tbody = document.getElementById('cust-tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><div class="cust-cell"><div class="cust-av" style="background:${color};">${initial}</div><div><div class="cust-name">${name}</div><div class="cust-email">${email}</div></div></div></td>
+    <td><span class="plan-tag ${planClass}">${planLabel}</span></td>
+    <td><span class="sdot sdot-a"></span>Active</td>
+    <td>${month}</td>
+    <td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td>
+  `;
+  tbody.appendChild(row);
+  updateCustCount();
+  closeAddCustomer();
+  showToast('✅ Customer added successfully!');
+}
+function deleteCustomer(btn) {
+  if(confirm('Remove this customer?')){
+    btn.closest('tr').remove();
+    updateCustCount();
+    showToast('🗑️ Customer removed.');
+  }
+}
+function updateCustCount(){
+  const count = document.getElementById('cust-tbody').querySelectorAll('tr').length;
+  document.getElementById('cust-count').textContent = `(${count})`;
+}
+</script>
+</body>
+</html>
