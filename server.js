@@ -128,6 +128,57 @@ Never say you are an AI language model - you are ZYRA, the business's assistant.
 }
 
 // ------------------------------------------------------------
+// GROQ - for the DASHBOARD's own "ask ZYRA for business advice"
+// chat (the owner talking to ZYRA, not a WhatsApp customer).
+// Separate from askGroq() above, which is customer-facing.
+// ------------------------------------------------------------
+async function askGroqForDashboard(userName, history) {
+  const biz = loadBusinessInfo();
+  const bizContext = (biz.name || biz.what || biz.products || biz.extra) ? `
+
+Here is real information about this business — use it to answer any
+questions accurately (like prices, products, or hours). Never make up
+prices or products that aren't listed here:
+Business name: ${biz.name || '(not provided)'}
+What they sell/offer: ${biz.what || '(not provided)'}
+Products & prices:
+${biz.products || '(not provided)'}
+Other details (hours, delivery, policies, payment):
+${biz.extra || '(not provided)'}` : '';
+
+  const systemPrompt = `You are ZYRA, a warm, intelligent, and professional AI business assistant. You were built to help small business owners in Nigeria and Africa grow their businesses.
+
+Your personality:
+- Friendly, warm and conversational - like a smart business friend
+- Professional but never stiff or robotic
+- If someone greets you (hi, hello, how are you), greet back warmly and ask how you can help
+- You use the owner's name "${userName}" occasionally to make it personal
+- You use emojis naturally but not excessively
+- You give practical, actionable advice - not generic fluff
+- You can help with: customer replies, social media content, business plans, product descriptions, pricing advice, marketing ideas, automation tips, and general business questions
+- When you don't know something, you're honest about it${bizContext}
+
+Keep responses conversational and not too long unless asked for detail. Always end with a follow-up question or offer to help more.`;
+
+  const response = await axios.post(
+    'https://api.groq.com/openai/v1/chat/completions',
+    {
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1000,
+      messages: [{ role: 'system', content: systemPrompt }, ...history]
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  return response.data.choices[0].message.content;
+}
+
+// ------------------------------------------------------------
 // WHATSAPP - sending messages out
 // ------------------------------------------------------------
 async function sendWhatsAppText(toPhoneNumber, text) {
@@ -237,6 +288,25 @@ app.post('/api/business-info', (req, res) => {
   const { name, what, products, extra } = req.body;
   saveBusinessInfo({ name, what, products, extra });
   res.json({ success: true });
+});
+
+// ------------------------------------------------------------
+// ROUTE: Dashboard's "ask ZYRA for advice" chat (owner-facing,
+// separate from the WhatsApp customer conversations above).
+// Keeps the Groq key safely on the server, never in the browser.
+// ------------------------------------------------------------
+app.post('/api/dashboard-chat', async (req, res) => {
+  try {
+    const { userName, history } = req.body;
+    if (!Array.isArray(history)) {
+      return res.status(400).json({ error: 'history must be an array of {role, content} messages' });
+    }
+    const reply = await askGroqForDashboard(userName || 'there', history.slice(-20));
+    res.json({ reply });
+  } catch (err) {
+    console.error('dashboard-chat error:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Something went wrong talking to the AI.' });
+  }
 });
 
 // ------------------------------------------------------------
