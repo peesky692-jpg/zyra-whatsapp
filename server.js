@@ -113,7 +113,7 @@ Never say you are an AI language model - you are ZYRA, the business's assistant.
   const response = await axios.post(
     'https://api.groq.com/openai/v1/chat/completions',
     {
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages
     },
     {
@@ -163,7 +163,7 @@ Keep responses conversational and not too long unless asked for detail. Always e
   const response = await axios.post(
     'https://api.groq.com/openai/v1/chat/completions',
     {
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       max_tokens: 1000,
       messages: [{ role: 'system', content: systemPrompt }, ...history]
     },
