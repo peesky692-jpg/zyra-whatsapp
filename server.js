@@ -15,8 +15,7 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const { MongoClient } = require('mongodb');
 
 const app = express();
 app.use(express.json());
@@ -40,46 +39,73 @@ const {
   WHATSAPP_PHONE_NUMBER_ID,
   WHATSAPP_VERIFY_TOKEN,
   BUSINESS_NAME,
+  MONGODB_URI,
   PORT
 } = process.env;
 
 const PORT_TO_USE = PORT || 3000;
 
 // ------------------------------------------------------------
-// SIMPLE STORAGE - a JSON file acts as our customer database.
-// No complicated database setup needed to get started.
+// DATABASE - MongoDB Atlas (replaces the old JSON-file storage,
+// which was wiped every time Render restarted the server).
+// Data now survives restarts and redeploys.
 // ------------------------------------------------------------
-const DB_FILE = path.join(__dirname, 'data', 'customers.json');
-const BIZ_FILE = path.join(__dirname, 'data', 'business-info.json');
+const mongoClient = new MongoClient(MONGODB_URI);
+let customersCollection;
+let businessInfoCollection;
 
-function loadCustomers() {
-  if (!fs.existsSync(DB_FILE)) return {};
-  return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+async function connectToDatabase() {
+  await mongoClient.connect();
+  const db = mongoClient.db('zyra');
+  customersCollection = db.collection('customers');
+  businessInfoCollection = db.collection('business_info');
+  console.log('Connected to MongoDB ✅');
 }
 
-function saveCustomers(data) {
-  fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+// Customers are stored one document per phone number, with
+// _id set to the phone number so lookups/upserts are simple.
+async function loadCustomers() {
+  const docs = await customersCollection.find({}).toArray();
+  const customers = {};
+  for (const doc of docs) {
+    customers[doc._id] = doc;
+  }
+  return customers;
+}
+
+async function getCustomer(phone) {
+  return customersCollection.findOne({ _id: phone });
+}
+
+async function saveCustomer(phone, data) {
+  await customersCollection.updateOne(
+    { _id: phone },
+    { $set: data },
+    { upsert: true }
+  );
 }
 
 // Business info (name, products, prices, hours, etc.) - set from the
 // ZYRA dashboard's "Business Info" tab, so WhatsApp replies are accurate
-// instead of the AI guessing.
-function loadBusinessInfo() {
-  if (!fs.existsSync(BIZ_FILE)) return {};
-  return JSON.parse(fs.readFileSync(BIZ_FILE, 'utf8'));
+// instead of the AI guessing. Stored as a single document.
+async function loadBusinessInfo() {
+  const doc = await businessInfoCollection.findOne({ _id: 'main' });
+  return doc || {};
 }
 
-function saveBusinessInfo(data) {
-  fs.mkdirSync(path.dirname(BIZ_FILE), { recursive: true });
-  fs.writeFileSync(BIZ_FILE, JSON.stringify(data, null, 2));
+async function saveBusinessInfo(data) {
+  await businessInfoCollection.updateOne(
+    { _id: 'main' },
+    { $set: data },
+    { upsert: true }
+  );
 }
 
 // ------------------------------------------------------------
 // GROQ - sends the conversation to the AI and gets a reply
 // ------------------------------------------------------------
 async function askGroq(customerName, conversationHistory) {
-  const biz = loadBusinessInfo();
+  const biz = await loadBusinessInfo();
   const bizName = biz.name || BUSINESS_NAME || 'this business';
 
   const bizContext = (biz.name || biz.what || biz.products || biz.extra) ? `
@@ -133,7 +159,7 @@ Never say you are an AI language model - you are ZYRA, the business's assistant.
 // Separate from askGroq() above, which is customer-facing.
 // ------------------------------------------------------------
 async function askGroqForDashboard(userName, history) {
-  const biz = loadBusinessInfo();
+  const biz = await loadBusinessInfo();
   const bizContext = (biz.name || biz.what || biz.products || biz.extra) ? `
 
 Here is real information about this business — use it to answer any
@@ -250,14 +276,12 @@ app.post('/api/add-customer', async (req, res) => {
     // leading 0 or +, e.g. Nigeria: 2348012345678
     const cleanPhone = phone.replace(/[^0-9]/g, '');
 
-    const customers = loadCustomers();
-    customers[cleanPhone] = {
+    await saveCustomer(cleanPhone, {
       name,
       phone: cleanPhone,
       conversation: [],
       addedAt: new Date().toISOString()
-    };
-    saveCustomers(customers);
+    });
 
     await sendWhatsAppTemplate(cleanPhone);
 
@@ -271,8 +295,8 @@ app.post('/api/add-customer', async (req, res) => {
 // ------------------------------------------------------------
 // ROUTE: List customers (handy for checking things are saved)
 // ------------------------------------------------------------
-app.get('/api/customers', (req, res) => {
-  res.json(loadCustomers());
+app.get('/api/customers', async (req, res) => {
+  res.json(await loadCustomers());
 });
 
 // ------------------------------------------------------------
@@ -280,13 +304,13 @@ app.get('/api/customers', (req, res) => {
 // The dashboard's "Business Info" tab calls these so that WhatsApp
 // replies use the exact same information.
 // ------------------------------------------------------------
-app.get('/api/business-info', (req, res) => {
-  res.json(loadBusinessInfo());
+app.get('/api/business-info', async (req, res) => {
+  res.json(await loadBusinessInfo());
 });
 
-app.post('/api/business-info', (req, res) => {
+app.post('/api/business-info', async (req, res) => {
   const { name, what, products, extra } = req.body;
-  saveBusinessInfo({ name, what, products, extra });
+  await saveBusinessInfo({ name, what, products, extra });
   res.json({ success: true });
 });
 
@@ -345,13 +369,12 @@ app.post('/webhook', async (req, res) => {
     const fromPhone = message.from;
     const text = message.text.body;
 
-    const customers = loadCustomers();
-    if (!customers[fromPhone]) {
+    let customer = await getCustomer(fromPhone);
+    if (!customer) {
       // Unknown number messaged us first - create a basic record
-      customers[fromPhone] = { name: 'Customer', phone: fromPhone, conversation: [] };
+      customer = { name: 'Customer', phone: fromPhone, conversation: [] };
     }
 
-    const customer = customers[fromPhone];
     customer.conversation.push({ role: 'user', content: text });
 
     // Keep only the last 10 messages so the AI stays fast and cheap
@@ -360,7 +383,7 @@ app.post('/webhook', async (req, res) => {
     const aiReply = await askGroq(customer.name, recentHistory);
 
     customer.conversation.push({ role: 'assistant', content: aiReply });
-    saveCustomers(customers);
+    await saveCustomer(fromPhone, customer);
 
     await sendWhatsAppText(fromPhone, aiReply);
   } catch (err) {
@@ -368,6 +391,13 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-app.listen(PORT_TO_USE, () => {
-  console.log(`ZYRA backend listening on port ${PORT_TO_USE}`);
-});
+connectToDatabase()
+  .then(() => {
+    app.listen(PORT_TO_USE, () => {
+      console.log(`ZYRA backend listening on port ${PORT_TO_USE}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB:', err.message);
+    process.exit(1);
+  });

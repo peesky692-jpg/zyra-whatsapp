@@ -9,7 +9,8 @@
   "dependencies": {
     "express": "^4.19.2",
     "axios": "^1.7.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.9.0"
   },
   "engines": {
     "node": ">=18.0.0"
