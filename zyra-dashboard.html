@@ -906,9 +906,7 @@ tr:hover td{background:var(--surface);}
             <table>
               <thead><tr><th>Customer</th><th>Plan</th><th>Status</th><th>Joined</th><th></th></tr></thead>
               <tbody id="cust-tbody">
-                <tr><td><div class="cust-cell"><div class="cust-av" style="background:#5B3BF5;">A</div><div><div class="cust-name">Amaka Obi</div><div class="cust-email">amaka@gmail.com</div></div></div></td><td><span class="plan-tag ptpro">Pro</span></td><td><span class="sdot sdot-a"></span>Active</td><td>Aug 2026</td><td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td></tr>
-                <tr><td><div class="cust-cell"><div class="cust-av" style="background:#059669;">K</div><div><div class="cust-name">Kwame Darko</div><div class="cust-email">kwame@gmail.com</div></div></div></td><td><span class="plan-tag ptbiz">Business</span></td><td><span class="sdot sdot-a"></span>Active</td><td>Aug 2026</td><td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td></tr>
-                <tr><td><div class="cust-cell"><div class="cust-av" style="background:#DC2626;">F</div><div><div class="cust-name">Fatima Musa</div><div class="cust-email">fatima@gmail.com</div></div></div></td><td><span class="plan-tag ptfree">Free</span></td><td><span class="sdot sdot-a"></span>Active</td><td>Aug 2026</td><td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td></tr>
+                <tr id="customers-empty"><td colspan="5" style="text-align:center;padding:28px;color:var(--muted);">No customers yet. Add your first customer above.</td></tr>
               </tbody>
             </table>
           </div>
@@ -941,7 +939,7 @@ tr:hover td{background:var(--surface);}
 
       <!-- REFERRAL -->
       <div class="db-section" id="db-referral">
-        <div class="db-welcome"><h2>Refer & Earn 💰</h2><p>Share ZYRA Business with others and earn $5 every month they stay subscribed!</p></div>
+        <div class="db-welcome"><h2>Refer & Earn 💰</h2><p>Share ZYRA Business with others. Referral tracking and payouts will be connected to your account when the referral backend is enabled.</p></div>
 
         <!-- Earnings Banner -->
         <div style="background:linear-gradient(135deg,#5B3BF5,#7C3AED);border-radius:16px;padding:24px;color:white;margin-bottom:20px;">
@@ -954,7 +952,7 @@ tr:hover td{background:var(--surface);}
             <div style="text-align:right;">
               <div style="font-size:13px;opacity:.8;margin-bottom:4px;">This month</div>
               <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;" id="ref-month-earnings">$0.00</div>
-              <div style="font-size:12px;opacity:.6;margin-top:4px;">Paid on 1st of every month</div>
+              <div style="font-size:12px;opacity:.6;margin-top:4px;">Referral payouts are not connected yet</div>
             </div>
           </div>
         </div>
@@ -978,7 +976,7 @@ tr:hover td{background:var(--surface);}
         <!-- Referral Link -->
         <div class="db-card" style="margin-bottom:20px;">
           <div class="db-ch"><div class="db-ct">Your Referral Link 🔗</div></div>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Share this link with anyone. When they subscribe to a paid plan you earn <strong style="color:var(--violet);">$5 every month</strong> they stay!</p>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Share this link with anyone. Your referral activity will be tracked by the ZYRA backend once the referral system is enabled.</p>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <div style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--ink);font-weight:500;word-break:break-all;" id="ref-link">zyrabusiness.netlify.app?ref=loading...</div>
             <button onclick="copyRefLink()" style="background:var(--violet);color:white;border:none;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;">📋 Copy Link</button>
@@ -1163,50 +1161,43 @@ Delivery within Lagos — ₦2,000"></textarea>
 // ============================================================
 const API_BASE_URL = 'https://zyra-whatsapp.onrender.com';
 
-// ZYRA AUTH SYSTEM - Uses localStorage for storage (works locally and when hosted)
+// ZYRA AUTH SYSTEM - credentials are stored securely on the backend.
+async function readApiJson(res) {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const body = await res.text();
+    console.error('ZYRA API returned non-JSON:', res.status, body.slice(0, 300));
+    throw new Error('ZYRA backend is not connected correctly. Please make sure the backend is deployed and running.');
+  }
+  return res.json();
+}
+
 const ZyraAuth = {
-  storageKey: 'zyra_users_db',
-
-  _readAll() {
-    try {
-      return JSON.parse(localStorage.getItem(this.storageKey) || '{}');
-    } catch(e) {
-      return {};
-    }
-  },
-
-  _writeAll(users) {
-    localStorage.setItem(this.storageKey, JSON.stringify(users));
-  },
-
-  async init() {
-    // No setup needed for localStorage, kept for compatibility with existing calls.
-    return Promise.resolve();
-  },
+  async init() { return true; },
 
   async addUser(user) {
-    const users = this._readAll();
-    if(users[user.email]) {
-      return Promise.reject('Email already registered');
-    }
-    users[user.email] = user;
-    this._writeAll(users);
-    return Promise.resolve(true);
+    const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        firstname: user.firstname, lastname: user.lastname, email: user.email,
+        password: user.rawPassword, business: user.business
+      })
+    });
+    const data = await readApiJson(res);
+    if (!res.ok) throw new Error(data.error || 'Could not create account');
+    return data.user;
   },
 
-  async getUser(email) {
-    const users = this._readAll();
-    return Promise.resolve(users[email] || null);
-  },
-
-  hashPassword(pw) {
-    // Simple hash for demo - in production use bcrypt
-    let hash = 0;
-    for(let i = 0; i < pw.length; i++) {
-      hash = ((hash << 5) - hash) + pw.charCodeAt(i);
-      hash |= 0;
-    }
-    return hash.toString(36) + pw.length + pw.charCodeAt(0);
+  async login(email, password) {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await readApiJson(res);
+    if (!res.ok) throw new Error(data.error || 'Incorrect email or password');
+    return data.user;
   }
 };
 
@@ -1222,11 +1213,14 @@ const WHATSAPP_CONFIG = {
 // Send WhatsApp message via backend proxy (secure)
 async function sendWhatsAppMessage(to, message) {
   try {
-    // In production this calls YOUR backend server
-    // which stores the token securely
-    // For now shows what would be sent
-    console.log('WhatsApp message queued:', {to, message});
-    return { success: true, queued: true };
+    const res = await fetch(`${API_BASE_URL}/api/send-whatsapp`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({to, message})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'WhatsApp message failed');
+    return { success: true, ...data };
   } catch(e) {
     return { success: false, error: e.message };
   }
@@ -1243,13 +1237,13 @@ async function testWhatsApp(testPhone) {
 
 // WhatsApp test button function
 async function testWhatsAppBtn() {
-  const phone = prompt('Enter your WhatsApp number to test (e.g. 09167953493):');
+  const phone = prompt('Enter WhatsApp number in international format (e.g. 2348012345678):');
   if(!phone) return;
   showToast('📤 Sending test message...');
   const result = await testWhatsApp(phone);
   if(result.success) {
     showToast('✅ WhatsApp message sent!');
-    addSkyMsg('✅ Test message sent to <strong>' + phone + '</strong>! Check your WhatsApp! 📱', false);
+    addSkyMsg('✅ Test message sent to <strong>' + phone + '</strong>.', false);
   } else {
     showToast('⚠️ ' + (result.error || 'Could not send'));
     addSkyMsg('⚠️ Note: Test accounts can only message verified numbers. Error: ' + result.error, false);
@@ -1276,17 +1270,14 @@ const skyTools = {
     name: 'AI Writing',
     connected: true,
     execute: async (params) => {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch(`${API_BASE_URL}/api/sky-ai`, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6', max_tokens: 1000,
-          system: 'You are SKY, an intelligent AI agent for ZYRA Business. Help small business owners in Nigeria and Africa. Be professional, friendly and practical.',
-          messages: [{role:'user', content: params.prompt}]
-        })
+        body: JSON.stringify({prompt: params.prompt})
       });
       const data = await res.json();
-      return data.content[0].text;
+      if (!res.ok) throw new Error(data.error || 'SKY AI request failed');
+      return data.reply;
     }
   },
   customers: {
@@ -1808,6 +1799,7 @@ function switchTab(tab) {
   document.getElementById('su-form').style.display = tab==='signup'?'block':'none';
   document.getElementById('li-form').style.display = tab==='login'?'block':'none';
   document.getElementById('success-sc').style.display = 'none';
+  if(tab === 'login') setTimeout(prefillLoginEmail, 0);
   document.querySelectorAll('.auth-tab').forEach((t,i)=>{
     t.classList.toggle('active', (tab==='signup'&&i===0)||(tab==='login'&&i===1));
   });
@@ -1841,29 +1833,16 @@ async function handleSignup() {
   btn.classList.add('loading');
 
   try {
-    await ZyraAuth.init();
-    const existing = await ZyraAuth.getUser(email);
-    if(existing) {
-      showToast('⚠️ Email already registered! Please sign in.');
-      btn.querySelector('.su-txt').style.display='block';
-      btn.querySelector('#su-spin').style.display='none';
-      btn.classList.remove('loading');
-      return;
-    }
-
     await ZyraAuth.addUser({
       email: email,
-      password: ZyraAuth.hashPassword(pw),
+      rawPassword: pw,
       firstname: fn,
       lastname: ln,
-      fullname: fn + ' ' + ln,
-      business: biz,
-      plan: 'free',
-      joined: new Date().toISOString()
+      business: biz
     });
 
     localStorage.setItem('zyra_name', fn);
-    localStorage.setItem('zyra_email', email);
+    localStorage.setItem('zyra_email', user.email || email);
     localStorage.setItem('zyra_logged_in', 'true');
 
     setTimeout(()=>{
@@ -1894,25 +1873,10 @@ async function handleLogin() {
   btn.classList.add('loading');
 
   try {
-    await ZyraAuth.init();
-    const user = await ZyraAuth.getUser(email);
-
-    if(!user || user.password !== ZyraAuth.hashPassword(pw)) {
-      showToast('❌ Wrong email or password!');
-      document.getElementById('li-email').style.border='1.5px solid #EF4444';
-      document.getElementById('li-pw').style.border='1.5px solid #EF4444';
-      setTimeout(()=>{
-        document.getElementById('li-email').style.border='1.5px solid #E5E3F0';
-        document.getElementById('li-pw').style.border='1.5px solid #E5E3F0';
-      },2000);
-      btn.querySelector('.li-txt').style.display='block';
-      btn.querySelector('#li-spin').style.display='none';
-      btn.classList.remove('loading');
-      return;
-    }
+    const user = await ZyraAuth.login(email, pw);
 
     localStorage.setItem('zyra_name', user.firstname);
-    localStorage.setItem('zyra_email', email);
+    localStorage.setItem('zyra_email', user.email || email);
     localStorage.setItem('zyra_logged_in', 'true');
 
     setTimeout(()=>{
@@ -1924,11 +1888,17 @@ async function handleLogin() {
     }, 1000);
 
   } catch(e) {
-    showToast('❌ Something went wrong. Please try again.');
+    showToast('❌ ' + (e.message || 'Something went wrong. Please try again.'));
     btn.querySelector('.li-txt').style.display='block';
     btn.querySelector('#li-spin').style.display='none';
     btn.classList.remove('loading');
   }
+}
+
+function prefillLoginEmail() {
+  const savedEmail = localStorage.getItem('zyra_email');
+  const input = document.getElementById('li-email');
+  if (savedEmail && input && !input.value) input.value = savedEmail;
 }
 
 function goToDashboard() {
@@ -1951,7 +1921,6 @@ function handleLogout() {
   document.getElementById('confirm-logout').onclick = function(){
     document.body.removeChild(overlay);
     localStorage.removeItem('zyra_name');
-    localStorage.removeItem('zyra_email');
     localStorage.removeItem('zyra_logged_in');
     showPage('landing');
   };
@@ -1960,31 +1929,24 @@ function handleLogout() {
 // REFERRAL SYSTEM
 function initReferral() {
   const name = localStorage.getItem('zyra_name') || 'user';
-  const refCode = name.toLowerCase().replace(/\s+/g,'') + Math.random().toString(36).substr(2,4);
-  localStorage.setItem('zyra_ref_code', refCode);
-  const refLink = 'zyrabusiness.netlify.app?ref=' + refCode;
+  let refCode = localStorage.getItem('zyra_ref_code');
+  if (!refCode) {
+    refCode = name.toLowerCase().replace(/\s+/g,'') + Math.random().toString(36).slice(2,6);
+    localStorage.setItem('zyra_ref_code', refCode);
+  }
+  const refLink = window.location.origin + window.location.pathname + '?ref=' + encodeURIComponent(refCode);
   const el = document.getElementById('ref-link');
   if(el) el.textContent = refLink;
 
-  // Load saved referral data
-  const refs = JSON.parse(localStorage.getItem('zyra_referrals') || '[]');
-  const paid = refs.filter(r=>r.paid);
-  const pending = refs.filter(r=>!r.paid);
-
-  // Calculate earnings based on tiers
-  let rate = 5;
-  if(paid.length >= 10) rate = 10;
-  else if(paid.length >= 3) rate = 7;
-  const monthly = paid.length * rate;
-
-  document.getElementById('ref-total-count').textContent = refs.length;
-  document.getElementById('ref-paid-count').textContent = paid.length;
-  document.getElementById('ref-pending-count').textContent = pending.length;
-  document.getElementById('ref-active-count').textContent = paid.length;
-  document.getElementById('ref-total-earnings').textContent = '$' + (monthly * 3).toFixed(2);
-  document.getElementById('ref-month-earnings').textContent = '$' + monthly.toFixed(2);
+  // Referral payments are NOT tracked locally. LocalStorage can be edited by
+  // a user, so it must never be used as proof of referrals or earnings.
+  document.getElementById('ref-total-count').textContent = '0';
+  document.getElementById('ref-paid-count').textContent = '0';
+  document.getElementById('ref-pending-count').textContent = '0';
+  document.getElementById('ref-active-count').textContent = '0';
+  document.getElementById('ref-total-earnings').textContent = '$0.00';
+  document.getElementById('ref-month-earnings').textContent = '$0.00';
 }
-
 function copyRefLink() {
   const link = document.getElementById('ref-link').textContent;
   if(navigator.clipboard) {
@@ -2091,7 +2053,7 @@ async function saveBusinessInfo() {
   setTimeout(()=>{ status.textContent=''; }, 4000);
 }
 
-document.addEventListener('DOMContentLoaded', loadBusinessInfoForm);
+document.addEventListener('DOMContentLoaded', () => { loadBusinessInfoForm(); loadCustomersFromBackend(); });
 
 // DASHBOARD SECTIONS
 function dbShow(name, el) {
@@ -2104,7 +2066,7 @@ function dbShow(name, el) {
   if(window.innerWidth<768){document.getElementById('db-sidebar').classList.remove('open');document.getElementById('db-overlay').classList.remove('show');}
   if(name==='bizinfo')loadBusinessInfoForm();
   // Update customer count when switching to customers
-  if(name==='customers') updateCustCount();
+  if(name==='customers'){ updateCustCount(); loadCustomersFromBackend(); }
 }
 
 // AI CHAT with conversation memory
@@ -2209,7 +2171,7 @@ function getAccountPlan(){
 }
 function getCustomerCount(){
   const tbody = document.getElementById('cust-tbody');
-  return tbody ? tbody.querySelectorAll('tr').length : 0;
+  return tbody ? Array.from(tbody.querySelectorAll('tr')).filter(r => r.id !== 'customers-empty').length : 0;
 }
 function showUpgradeModal(reason){
   const msg = reason || 'You\'ve reached the limit of the Free plan.';
@@ -2241,10 +2203,11 @@ async function saveCustomer() {
     const res = await fetch(`${API_BASE_URL}/api/add-customer`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone })
+      body: JSON.stringify({ name, email, phone })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to add customer');
+    if (data.warning) showToast('⚠️ Customer saved, but welcome message was not sent.');
   } catch (e) {
     showToast('⚠️ ' + e.message);
     console.error('saveCustomer error:', e);
@@ -2261,7 +2224,9 @@ async function saveCustomer() {
   const now = new Date();
   const month = now.toLocaleDateString('en-US',{month:'short',year:'numeric'});
   const tbody = document.getElementById('cust-tbody');
+  document.getElementById('customers-empty')?.remove();
   const row = document.createElement('tr');
+  row.dataset.phone = phone.replace(/\D/g,'');
   row.innerHTML = `
     <td><div class="cust-cell"><div class="cust-av" style="background:${color};">${initial}</div><div><div class="cust-name">${name}</div><div class="cust-email">${email}</div></div></div></td>
     <td><span class="plan-tag ${planClass}">${planLabel}</span></td>
@@ -2274,15 +2239,56 @@ async function saveCustomer() {
   closeAddCustomer();
   showToast('✅ Customer added successfully!');
 }
-function deleteCustomer(btn) {
-  if(confirm('Remove this customer?')){
-    btn.closest('tr').remove();
+async function loadCustomersFromBackend() {
+  const tbody = document.getElementById('cust-tbody');
+  if (!tbody) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/customers`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not load customers');
+    tbody.innerHTML = '';
+    const customers = Object.values(data || {});
+    if (!customers.length) {
+      tbody.innerHTML = '<tr id="customers-empty"><td colspan="5" style="text-align:center;padding:28px;color:var(--muted);">No customers yet. Add your first customer above.</td></tr>';
+    } else {
+      const colors = ['#5B3BF5','#059669','#DC2626','#D97706','#2563EB','#7C3AED'];
+      customers.forEach((customer, index) => {
+        const name = customer.name || 'Customer';
+        const color = colors[index % colors.length];
+        const row = document.createElement('tr');
+        row.dataset.phone = customer.phone || customer._id || '';
+        const joined = customer.addedAt ? new Date(customer.addedAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}) : '—';
+        row.innerHTML = `<td><div class="cust-cell"><div class="cust-av" style="background:${color};">${name.charAt(0).toUpperCase()}</div><div><div class="cust-name"></div><div class="cust-email"></div></div></div></td><td><span class="plan-tag ptfree">Customer</span></td><td><span class="sdot sdot-a"></span>Active</td><td>${joined}</td><td><button onclick="deleteCustomer(this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">🗑️</button></td>`;
+        row.querySelector('.cust-name').textContent = name;
+        row.querySelector('.cust-email').textContent = customer.email || customer.phone || '';
+        tbody.appendChild(row);
+      });
+    }
+    updateCustCount();
+  } catch (e) {
+    console.error('loadCustomersFromBackend error:', e);
+    showToast('⚠️ Could not load customers from server.');
+  }
+}
+
+async function deleteCustomer(btn) {
+  const row = btn.closest('tr');
+  const phone = row?.dataset.phone;
+  if (!phone) { row?.remove(); updateCustCount(); return; }
+  if(!confirm('Remove this customer?')) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/customers/${encodeURIComponent(phone)}`, {method:'DELETE'});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not remove customer');
+    row.remove();
     updateCustCount();
     showToast('🗑️ Customer removed.');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
   }
 }
 function updateCustCount(){
-  const count = document.getElementById('cust-tbody').querySelectorAll('tr').length;
+  const count = Array.from(document.getElementById('cust-tbody').querySelectorAll('tr')).filter(r => r.id !== 'customers-empty').length;
   document.getElementById('cust-count').textContent = `(${count})`;
 }
 </script>

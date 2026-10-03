@@ -16,6 +16,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const { MongoClient } = require('mongodb');
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
@@ -24,7 +25,7 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
@@ -53,12 +54,15 @@ const PORT_TO_USE = PORT || 3000;
 const mongoClient = new MongoClient(MONGODB_URI);
 let customersCollection;
 let businessInfoCollection;
+let usersCollection;
 
 async function connectToDatabase() {
   await mongoClient.connect();
   const db = mongoClient.db('zyra');
   customersCollection = db.collection('customers');
   businessInfoCollection = db.collection('business_info');
+  usersCollection = db.collection('users');
+  await usersCollection.createIndex({ email: 1 }, { unique: true });
   console.log('Connected to MongoDB ✅');
 }
 
@@ -100,6 +104,116 @@ async function saveBusinessInfo(data) {
     { upsert: true }
   );
 }
+
+// ------------------------------------------------------------
+// AUTH - account signup/login
+// Passwords are NEVER stored as plain text. We use Node's built-in
+// scrypt password hashing and only return safe user information.
+// ------------------------------------------------------------
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(String(password), salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, stored) {
+  try {
+    const [salt, storedHash] = String(stored || '').split(':');
+    if (!salt || !storedHash) return false;
+    const derived = crypto.scryptSync(String(password), salt, 64);
+    const expected = Buffer.from(storedHash, 'hex');
+    return expected.length === derived.length && crypto.timingSafeEqual(derived, expected);
+  } catch {
+    return false;
+  }
+}
+
+function safeUser(user) {
+  return {
+    id: user._id,
+    firstname: user.firstname || '',
+    lastname: user.lastname || '',
+    fullname: user.fullname || '',
+    email: user.email,
+    business: user.business || '',
+    plan: user.plan || 'free',
+    joined: user.joined || user.createdAt || null
+  };
+}
+
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    if (!usersCollection) return res.status(503).json({ error: 'Database is not ready yet. Please try again.' });
+
+    const firstname = String(req.body.firstname || '').trim();
+    const lastname = String(req.body.lastname || '').trim();
+    const email = normalizeEmail(req.body.email);
+    const password = String(req.body.password || '');
+    const business = String(req.body.business || '').trim();
+
+    if (!firstname || !email || !password) {
+      return res.status(400).json({ error: 'First name, email and password are required.' });
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    }
+
+    const existing = await usersCollection.findOne({ email });
+    if (existing) {
+      return res.status(409).json({ error: 'An account with this email already exists. Please log in.' });
+    }
+
+    const now = new Date().toISOString();
+    const user = {
+      firstname,
+      lastname,
+      fullname: `${firstname} ${lastname}`.trim(),
+      email,
+      business,
+      passwordHash: hashPassword(password),
+      plan: 'free',
+      joined: now,
+      createdAt: now
+    };
+
+    const result = await usersCollection.insertOne(user);
+    user._id = result.insertedId.toString();
+    res.status(201).json({ success: true, user: safeUser(user) });
+  } catch (err) {
+    console.error('signup error:', err.message);
+    if (err.code === 11000) return res.status(409).json({ error: 'An account with this email already exists. Please log in.' });
+    res.status(500).json({ error: 'Could not create your account right now.' });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    if (!usersCollection) return res.status(503).json({ error: 'Database is not ready yet. Please try again.' });
+
+    const email = normalizeEmail(req.body.email);
+    const password = String(req.body.password || '');
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+
+    const user = await usersCollection.findOne({ email });
+    if (!user || !verifyPassword(password, user.passwordHash)) {
+      return res.status(401).json({ error: 'Incorrect email or password.' });
+    }
+
+    res.json({ success: true, user: safeUser(user) });
+  } catch (err) {
+    console.error('login error:', err.message);
+    res.status(500).json({ error: 'Could not log you in right now.' });
+  }
+});
 
 // ------------------------------------------------------------
 // GROQ - sends the conversation to the AI and gets a reply
